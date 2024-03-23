@@ -1,0 +1,16 @@
+<!-- app/views/tickets/index.html.erb -->
+
+<h1>Tickets</h1>
+
+<% if @tickets.present? %>
+  <ul>
+    <% @tickets.each do |ticket| %>
+      <li>
+        <%= ticket['subject'] %> - <%= ticket['status'] %>
+        <!-- Display other ticket details as needed -->
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>No tickets found.</p>
+<% end %>
