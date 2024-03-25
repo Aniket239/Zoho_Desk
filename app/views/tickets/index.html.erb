@@ -2,13 +2,12 @@
 
 <h1>Tickets</h1>
 
-<% if @tickets.present? %>
+<% if @tickets.present? && @tickets["data"].present? %>
   <ul>
-    <% @tickets.each do |ticket| %>
-      <li>
-        <%= ticket['subject'] %> - <%= ticket['status'] %>
-        <!-- Display other ticket details as needed -->
-      </li>
+    <% @tickets["data"].each do |ticket| %>
+      <li>Ticket Number: <%= ticket["ticketNumber"] %></li>
+      <li>Email: <%= ticket["email"] %></li>
+      <li>Subject: <%= ticket["subject"] %></li>
     <% end %>
   </ul>
 <% else %>

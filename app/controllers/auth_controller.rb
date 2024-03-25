@@ -17,7 +17,7 @@ class AuthController < ApplicationController
         client_secret = '7241a1ead9a8513ebea78500298e54fb2db44cee9d'
         redirect_uri = 'http://localhost:3000/auth/callback'
       
-        token_url = "https://accounts.zoho.com/oauth/v2/token"
+        token_url = "https://accounts.zoho.in/oauth/v2/token"
         
         response = HTTParty.post(token_url, body: {
           code: authorization_code,
@@ -29,15 +29,17 @@ class AuthController < ApplicationController
 
       
         access_token = response.parsed_response['access_token']
-        p "================================================================="
+        refresh_token = response.parsed_response['refresh_token']
+        p "=========================== access token ======================================"
         p access_token
         p "response"
-        p response
-        p "================================================================"
+        p "=========================== refresh token ================================="
+        p refresh_token
+
         # Save the access token securely (e.g., in your database or session)
-        p "================================================================"
-        session[:access_token] = access_token
-        p session[:access_token]
+        cookies[:access_token] = access_token
+        p "cookies"
+        p cookies[:access_token]
         p "================================================================"
         
         redirect_to tickets_index_path, notice: 'You have been successfully authenticated!'

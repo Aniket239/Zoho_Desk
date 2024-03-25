@@ -1,6 +1,6 @@
 class ZohoDeskApiService
     include HTTParty
-    base_uri 'https://desk.zoho.com/api/v1'
+    base_uri 'https://desk.zoho.in/api/v1'
   
     def initialize(access_token)
       @access_token = access_token
@@ -16,6 +16,7 @@ class ZohoDeskApiService
         self.class.post('/tickets', headers: headers, body: ticket_data.to_json)
       end
       def list_tickets
+        p "============================== get tickets ================="
         self.class.get('/tickets', headers: { 'Authorization' => "Zoho-oauthtoken #{@access_token}" })
     end
       
