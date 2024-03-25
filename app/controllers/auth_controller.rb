@@ -1,7 +1,7 @@
 class AuthController < ApplicationController
     def authorize
-        client_id = ZOHO_DESK_CONFIGURATION[:client_id]
-        redirect_uri = ZOHO_DESK_CONFIGURATION[:redirect_uri]
+        client_id = '1000.RMODJ3TXVWLVGROZQR2CYKWAQQL4RK'
+        redirect_uri = 'http://localhost:3000/auth/callback'
         scope = 'Desk.tickets.ALL'  # Define the scope based on your needs
         response_type = 'code'
     
@@ -13,9 +13,9 @@ class AuthController < ApplicationController
         authorization_code = params[:code]
         p "authorization code"
         p authorization_code
-        client_id = ZOHO_DESK_CONFIGURATION[:client_id]
-        client_secret = ZOHO_DESK_CONFIGURATION[:client_secret]
-        redirect_uri = ZOHO_DESK_CONFIGURATION[:redirect_uri]
+        client_id = '1000.RMODJ3TXVWLVGROZQR2CYKWAQQL4RK'
+        client_secret = '7241a1ead9a8513ebea78500298e54fb2db44cee9d'
+        redirect_uri = 'http://localhost:3000/auth/callback'
       
         token_url = "https://accounts.zoho.com/oauth/v2/token"
         

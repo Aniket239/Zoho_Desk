@@ -1,7 +1,9 @@
 class TicketsController < ApplicationController
     def index
       # Assuming ZohoDeskService is the service object handling the API calls
-      zoho_desk_service = ZohoDeskApiService.new(session[:zoho_desk_session])
+      zoho_desk_service = ZohoDeskApiService.new(session[:_zoho_desk_session])
+      p "zoho desk service"
+      p zoho_desk_service
       response = zoho_desk_service.list_tickets
       p "response tickets"
       p response
