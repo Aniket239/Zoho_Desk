@@ -104,7 +104,28 @@
 <div class="ticket-container">
   <div class="ticket-info">
     <h1>Ticket #<%= @ticket["ticketNumber"] %> - <%= @ticket["subject"] %></h1>
-    <%= link_to 'Reply', tickets_reply_path, class: "reply-link" %>
+    <button onclick='showReplyForm()', class="reply-link" >Reply</button>
+  </div>
+    
+  <div id="reply-form" style="display: none;">
+    <%= form_tag(tickets_reply_path, method: :post) do %>
+      <p><strong>Reply to Ticket</strong></p>
+      <div style="display: none;">
+        <%= label_tag :cc, 'CC:' %>
+        <%= text_field_tag :cc, '', id: 'cc' %>
+      </div>
+      <div>
+        <%= label_tag :subject, 'Subject:' %>
+        <%= text_field_tag :subject, @ticket["subject"] %>
+      </div>
+      <div>
+        <%= label_tag :body, 'Body:' %>
+        <%= text_area_tag :body %>
+      </div>
+      <div>
+        <%= submit_tag 'Send' %>
+      </div>
+    <% end %>
   </div>
 
   <div class="threads">
@@ -142,5 +163,9 @@
     var details = threadElement.querySelector('.thread-details');
     var isVisible = details.style.display === 'block';
     details.style.display = isVisible ? 'none' : 'block';
+  }
+  function showReplyForm() {
+    var form = document.getElementById('reply-form');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
   }
 </script>
