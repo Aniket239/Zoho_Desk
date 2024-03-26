@@ -5,8 +5,8 @@ Rails.application.routes.draw do
   post 'tickets/login'
   get 'tickets/index'
   post 'tickets/index'
-  get 'tickets/update'
-  post 'tickets/update'
+  get 'tickets/threads'
+  post 'tickets/threads'
   get 'tickets/edit'
   post 'tickets/edit'
 end

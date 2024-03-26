@@ -14,21 +14,16 @@ class TicketsController < ApplicationController
       redirect_to root_path
     end
   end
-  def update
+  def threads
     ticket_id = params[:id]
     access_token = cookies[:access_token]
-    ticket_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}",
-                                   headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-    threads_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads",
-                                    headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-
-    # Parse the responses
+    ticket_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+    threads_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads",headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
     @ticket = ticket_response.parsed_response
     @threads = threads_response.parsed_response
     if @ticket["erroCode"]=="INVALID_OAUTH" || @threads["errorCode"] == "INVALID_OAUTH"
       redirect_to root_path
     end
-    # Logging the responses
     p "Ticket response:"
     p @ticket
     p "Threads response:"
