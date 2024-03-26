@@ -58,6 +58,10 @@
     margin: 4px 0;
 }
 
+.tickets a{
+    text-decoration: none;
+}
+
 
 </style>
 
@@ -65,15 +69,17 @@
 <h1>Tickets</h1>
 <% if @tickets.present? && @tickets["data"].present? %>
     <% @tickets["data"].each do |ticket| %>
+    <%= link_to tickets_update_path(ticket) do %>
     <div class="ticket">
       <p>Subject: <%= ticket["subject"] %></p>
-      <div class="info">
-      <p>Ticket Number: <%= ticket["ticketNumber"] %></p>&nbsp;<p>--</p>&nbsp;
-      <p>Email: <%= ticket["email"] %></p>&nbsp;<p>--</p>&nbsp;
-      <p>Channel: <%= ticket["channel"] %></p>&nbsp;<p>--</p>&nbsp;
-      <p>Status: <%= ticket["status"] %></p>&nbsp;
+        <div class="info">
+            <p>Ticket Number: <%= ticket["ticketNumber"] %></p>&nbsp;<p>--</p>&nbsp;
+            <p>Email: <%= ticket["email"] %></p>&nbsp;<p>--</p>&nbsp;
+            <p>Channel: <%= ticket["channel"] %></p>&nbsp;<p>--</p>&nbsp;
+            <p>Status: <%= ticket["status"] %></p>&nbsp;
+        </div>
       </div>
-      </div>
+    <% end %>
     <% end %>
 <% else %>
   <p>No tickets found.</p>

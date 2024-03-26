@@ -13,4 +13,7 @@ class TicketsController < ApplicationController
       redirect_to root_path
     end
   end
+  def update
+    
+  end
 end
