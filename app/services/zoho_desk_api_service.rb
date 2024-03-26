@@ -12,12 +12,10 @@ class ZohoDeskApiService
         "Content-Type" => "application/json"
       }
     end
-    def create_ticket(ticket_data)
-        self.class.post('/tickets', headers: headers, body: ticket_data.to_json)
-      end
-      def list_tickets
+    def list_tickets
         self.class.get('/tickets', headers: { 'Authorization' => "Zoho-oauthtoken #{@access_token}" })
     end
+    
       
   end
 

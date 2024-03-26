@@ -1,1 +1,95 @@
-<p><%= @ticket_data%></p>
+<style>
+    /* Base styles for the entire ticket container */
+.ticket-container {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #333;
+  background-color: #f4f7f6;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling for the ticket header */
+.ticket-container h1 {
+  font-size: 1.6em;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #2ecc71;
+}
+
+/* Style for each thread */
+.thread {
+  background-color: #fff;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-left: 4px solid #2ecc71;
+  border-radius: 4px;
+}
+
+/* Thread details with bold labels */
+.thread p {
+  margin: 0.5rem 0;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+.thread p strong {
+  display: inline-block;
+  min-width: 80px;
+  font-weight: 700;
+  color: #34495e;
+}
+
+/* Responsive design to adjust when the screen width is 600px or less */
+@media (max-width: 600px) {
+  .ticket-container {
+    margin: 1rem;
+    padding: 1rem;
+  }
+  
+  .thread p strong {
+    min-width: 70px;
+  }
+}
+
+/* Adding some hover effect for interactive elements */
+.thread p strong:hover {
+  color: #1abc9c;
+  cursor: pointer;
+}
+
+/* Additional styles for specific elements can go here */
+
+</style>
+
+<div class="ticket-container">
+  <h1>Ticket ##<%= @ticket["ticketNumber"] %> - <%= @ticket["subject"] %></h1>
+  <div class="ticket-info">
+    <!-- Ticket metadata here -->
+  </div>
+
+  <div class="threads">
+    <% @threads["data"].each do |thread| %>
+      <div class="thread">
+        <p><strong>Channel:</strong> <%= thread["channel"] %></p>
+        <p><strong>Summary:</strong> <%= thread["summary"] %></p>
+        <p><strong>Author Name:</strong> <%= thread["author"]["name"] %></p>
+        <p><strong>Author Email:</strong> <%= thread["author"]["email"] %></p>
+        <p><strong>Author Type:</strong> <%= thread["author"]["type"] %></p>
+        <p><strong>Last Name:</strong> <%= thread["author"]["lastName"] %></p>
+        <p><strong>Created:</strong> <%= time_ago_in_words(Time.parse(thread["createdTime"])) %> ago</p>
+        <p><strong>Direction:</strong> <%= thread["direction"] %></p>
+        <% if thread["cc"].present? %>
+          <p><strong>CC:</strong> <%= thread["cc"] %></p>
+        <% end %>
+        <% if thread["bcc"].present? %>
+          <p><strong>BCC:</strong> <%= thread["bcc"] %></p>
+        <% end %>
+        <p><strong>From:</strong> <%= thread["fromEmailAddress"] %></p>
+      </div>
+    <% end %>
+  </div>
+</div>
