@@ -9,4 +9,6 @@ Rails.application.routes.draw do
   post 'tickets/threads'
   get 'tickets/edit'
   post 'tickets/edit'
+  get 'tickets/reply'
+  post 'tickets/reply'
 end

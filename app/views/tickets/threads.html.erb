@@ -1,95 +1,146 @@
 <style>
-    /* Base styles for the entire ticket container */
+/* Reset some default styling */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Basic styling for the ticket container */
 .ticket-container {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  color: #333;
-  background-color: #f4f7f6;
-  max-width: 800px;
-  margin: 2rem auto;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Styling for the ticket header */
-.ticket-container h1 {
-  font-size: 1.6em;
-  color: #2c3e50;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #2ecc71;
-}
-
-/* Style for each thread */
-.thread {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #fff;
-  margin-bottom: 1rem;
-  padding: 1rem;
-  border-left: 4px solid #2ecc71;
-  border-radius: 4px;
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e1e1e1;
 }
 
-/* Thread details with bold labels */
+/* Header with improved visual hierarchy */
+.ticket-container h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+.ticket-info{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e1e1e1;
+  padding: 0 0 1% 0%;
+}
+
+/* Reply button styling */
+.reply-link {
+  display: inline-block;
+  background-color: #030bfc;
+  color: white;
+  padding: 5px 25px 10px;
+  text-align: center;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.reply-link:hover {
+  background-color: #2b6fe3;
+}
+
+/* Thread container and hover effect for each thread */
+.thread {
+  margin-bottom: 20px;
+  cursor: pointer;
+  border-left: 5px solid #5cb85c;
+  transition: background-color 0.3s ease, border-left-color 0.3s ease;
+}
+
+.thread:hover {
+  background-color: #f9f9f9;
+  border-left-color: #4cae4c;
+}
+
+/* Styles for thread summary and details */
+.thread-summary, .thread-details {
+  padding: 15px;
+}
+
+/* Styling the paragraphs within threads for better readability */
 .thread p {
-  margin: 0.5rem 0;
-  font-size: 0.9em;
-  line-height: 1.5;
+  margin-bottom: 10px;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 .thread p strong {
-  display: inline-block;
-  min-width: 80px;
   font-weight: 700;
-  color: #34495e;
+  color: #555;
+  margin-right: 5px;
 }
 
-/* Responsive design to adjust when the screen width is 600px or less */
-@media (max-width: 600px) {
+/* Making the accordion details invisible by default */
+.thread-details {
+  display: none;
+  padding-top: 10px;
+  border-top: 1px solid #e1e1e1;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
   .ticket-container {
-    margin: 1rem;
-    padding: 1rem;
+    margin: 20px;
   }
-  
-  .thread p strong {
-    min-width: 70px;
+
+  .reply-link {
+    padding: 8px 15px;
+    font-size: 14px;
   }
 }
-
-/* Adding some hover effect for interactive elements */
-.thread p strong:hover {
-  color: #1abc9c;
-  cursor: pointer;
-}
-
-/* Additional styles for specific elements can go here */
-
 </style>
 
 <div class="ticket-container">
-  <h1>Ticket ##<%= @ticket["ticketNumber"] %> - <%= @ticket["subject"] %></h1>
   <div class="ticket-info">
-    <!-- Ticket metadata here -->
+    <h1>Ticket #<%= @ticket["ticketNumber"] %> - <%= @ticket["subject"] %></h1>
+    <%= link_to 'Reply', tickets_reply_path, class: "reply-link" %>
   </div>
 
   <div class="threads">
-    <% @threads["data"].each do |thread| %>
-      <div class="thread">
-        <p><strong>Channel:</strong> <%= thread["channel"] %></p>
-        <p><strong>Summary:</strong> <%= thread["summary"] %></p>
-        <p><strong>Author Name:</strong> <%= thread["author"]["name"] %></p>
-        <p><strong>Author Email:</strong> <%= thread["author"]["email"] %></p>
-        <p><strong>Author Type:</strong> <%= thread["author"]["type"] %></p>
-        <p><strong>Last Name:</strong> <%= thread["author"]["lastName"] %></p>
-        <p><strong>Created:</strong> <%= time_ago_in_words(Time.parse(thread["createdTime"])) %> ago</p>
-        <p><strong>Direction:</strong> <%= thread["direction"] %></p>
-        <% if thread["cc"].present? %>
-          <p><strong>CC:</strong> <%= thread["cc"] %></p>
-        <% end %>
-        <% if thread["bcc"].present? %>
-          <p><strong>BCC:</strong> <%= thread["bcc"] %></p>
-        <% end %>
-        <p><strong>From:</strong> <%= thread["fromEmailAddress"] %></p>
+    <% @threads["data"].each_with_index do |thread, index| %>
+      <div class="thread" onclick="toggleThreadDetails(this)">
+        <div class="thread-summary">
+          <!-- <p>ID: <%= thread["id"]%></p> -->
+          <p><strong>Channel:</strong> <%= thread["channel"] %></p>
+          <p><strong>Author Name:</strong> <%= thread["author"]["name"] %></p>
+          <% summary_parts = thread["summary"].partition("How would you rate our customer service? Good Bad") %>
+          <p><strong>Summary:</strong> <%= summary_parts.first %></p>
+          <% if summary_parts.second %>
+            <p><%= summary_parts.second %></p>
+          <% end %>
+        </div>
+        <div class="thread-details" style="display: none;">
+          <p><strong>Author Email:</strong> <%= mail_to thread["author"]["email"] %></p>
+          <p><strong>Author Type:</strong> <%= thread["author"]["type"] %></p>
+          <p><strong>Created:</strong> <%= time_ago_in_words(Time.parse(thread["createdTime"])) %> ago</p>
+          <p><strong>Direction:</strong> <%= thread["direction"] %></p>
+          <% if thread["cc"].present? %>
+            <p><strong>CC:</strong> <%= thread["cc"] %></p>
+          <% end %>
+          <% if thread["bcc"].present? %>
+            <p><strong>BCC:</strong> <%= thread["bcc"] %></p>
+          <% end %>
+          <p><strong>From:</strong> <%= thread["fromEmailAddress"] %></p>
+        </div>
       </div>
     <% end %>
   </div>
 </div>
+<script>
+  function toggleThreadDetails(threadElement) {
+    var details = threadElement.querySelector('.thread-details');
+    var isVisible = details.style.display === 'block';
+    details.style.display = isVisible ? 'none' : 'block';
+  }
+</script>

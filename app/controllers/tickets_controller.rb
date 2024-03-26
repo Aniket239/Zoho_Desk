@@ -30,4 +30,8 @@ class TicketsController < ApplicationController
     p @threads
   end
 
+  def reply
+
+  end
+
 end
