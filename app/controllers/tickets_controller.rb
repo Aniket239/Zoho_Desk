@@ -9,11 +9,15 @@ class TicketsController < ApplicationController
         tickets_data["data"] = sorted_tickets
       end
       @tickets = tickets_data
+      p @tickets
     else
       redirect_to root_path
     end
   end
   def update
-    
+    p "==================== ticket data ==================="
+    @ticket_data = params[:format]
+    p @ticket_data
+    p "==================== ticket data ==================="
   end
 end

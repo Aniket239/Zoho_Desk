@@ -69,7 +69,7 @@
 <h1>Tickets</h1>
 <% if @tickets.present? && @tickets["data"].present? %>
     <% @tickets["data"].each do |ticket| %>
-    <%= link_to tickets_update_path(ticket) do %>
+    <%= link_to tickets_update_path(ticket["id"]) do %>
     <div class="ticket">
       <p>Subject: <%= ticket["subject"] %></p>
         <div class="info">

@@ -7,4 +7,6 @@ Rails.application.routes.draw do
   post 'tickets/index'
   get 'tickets/update'
   post 'tickets/update'
+  get 'tickets/edit'
+  post 'tickets/edit'
 end

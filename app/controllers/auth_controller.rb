@@ -4,11 +4,11 @@ class AuthController < ApplicationController
         redirect_uri = 'http://localhost:3000/auth/callback'
         scope = 'Desk.tickets.ALL'  # Define the scope based on your needs
         response_type = 'code'
-    
         authorization_url = "https://accounts.zoho.com/oauth/v2/auth?response_type=#{response_type}&client_id=#{client_id}&scope=#{scope}&redirect_uri=#{redirect_uri}&access_type=offline&prompt=consent"
         
         redirect_to authorization_url
       end
+      
       def callback
         authorization_code = params[:code]
         p "authorization code"
@@ -26,22 +26,9 @@ class AuthController < ApplicationController
           redirect_uri: redirect_uri,
           grant_type: 'authorization_code'
         })
-
-      
         access_token = response.parsed_response['access_token']
         refresh_token = response.parsed_response['refresh_token']
-        p "=========================== access token ======================================"
-        p access_token
-        p "response"
-        p "=========================== refresh token ================================="
-        p refresh_token
-
-        # Save the access token securely (e.g., in your database or session)
-        cookies[:access_token] = access_token
-        p "cookies"
-        p cookies[:access_token]
-        p "================================================================"
-        
+        cookies[:access_token] = access_token        
         redirect_to tickets_index_path, notice: 'You have been successfully authenticated!'
       end
       
