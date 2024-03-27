@@ -16,6 +16,7 @@ class TicketsController < ApplicationController
   end
   def threads
     ticket_id = params[:id]
+    cookies[:ticket_id] = ticket_id
     access_token = cookies[:access_token]
     ticket_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
     threads_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads",headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
@@ -31,10 +32,13 @@ class TicketsController < ApplicationController
   end
 
   def reply
-    ticket_id = params[:id]
+    ticket_id = cookies[:ticket_id]
+    p "ticket id"
+    p ticket_id
     access_token = cookies[:access_token]
     api_url = "https://desk.zoho.in/api/v1/tickets/#{ticket_id}/sendReply"
     reply_data = {
+      channel: "EMAIL",
       fromEmailAddress: params[:from],
       to: params[:to],
       cc: params[:cc],
@@ -43,8 +47,6 @@ class TicketsController < ApplicationController
     }
     p "reply data"
     p reply_data
-
-    # Make the API request to Zoho Desk
     response = HTTParty.post(api_url,
                              headers: {
                                'Authorization' => "Zoho-oauthtoken #{access_token}",
@@ -52,13 +54,13 @@ class TicketsController < ApplicationController
                              },
                              body: reply_data.to_json)
 
-    # Handle the response
     if response.code == 200
-      flash[:notice] = "Reply sent successfully"
-      redirect_to tickets_index_path # Redirect to an appropriate path
+      p "successful"
+      redirect_to action: :threads, id: ticket_id
     else
       flash[:alert] = "Failed to send reply"
+      p "error"
+      p response.code
     end
   end
-
 end

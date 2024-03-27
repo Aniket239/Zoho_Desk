@@ -169,7 +169,7 @@
     <div class="reply-form">
       <p>Reply</p>
       <%= form_tag(tickets_reply_url, method: "post") do %>
-      <% hidden_field_tag :id, @ticket["id"]%>
+      <% hidden_field_tag :id, @threads["id"]%>
         <div>
           <%= label_tag :from, 'From:' %>
           <%= text_field_tag :from, "support@thejaingroup.zohodesk.in" %>
@@ -189,7 +189,6 @@
         <%= submit_tag "Send" %>
       <% end %>
     </div>
-
     <% @threads["data"].each_with_index do |thread, index| %>
       <div class="thread" onclick="toggleThreadDetails(this)">
         <div class="thread-summary">
