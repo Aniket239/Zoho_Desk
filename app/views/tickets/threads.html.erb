@@ -99,6 +99,65 @@
     font-size: 14px;
   }
 }
+.reply-form{
+  display: none;
+}
+.reply-form {
+  background-color: #f3f3f3;
+  padding: 20px;
+  margin-top: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.reply-form p {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.reply-form div {
+  margin-bottom: 10px;
+}
+
+.reply-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.reply-form input[type="text"],
+.reply-form textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box; /* Makes sure padding doesn't affect width */
+}
+
+.reply-form input[type="text"] {
+  height: 40px;
+}
+
+.reply-form textarea {
+  height: 150px;
+  resize: vertical; /* Allows vertical resizing, good for longer texts */
+}
+
+.reply-form input[type="submit"] {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.reply-form input[type="submit"]:hover {
+  background-color: #45a049;
+}
+
 </style>
 
 <div class="ticket-container">
@@ -106,29 +165,31 @@
     <h1>Ticket #<%= @ticket["ticketNumber"] %> - <%= @ticket["subject"] %></h1>
     <button onclick='showReplyForm()', class="reply-link" >Reply</button>
   </div>
-    
-  <div id="reply-form" style="display: none;">
-    <%= form_tag(tickets_reply_path, method: :post) do %>
-      <p><strong>Reply to Ticket</strong></p>
-      <div style="display: none;">
-        <%= label_tag :cc, 'CC:' %>
-        <%= text_field_tag :cc, '', id: 'cc' %>
-      </div>
-      <div>
-        <%= label_tag :subject, 'Subject:' %>
-        <%= text_field_tag :subject, @ticket["subject"] %>
-      </div>
-      <div>
-        <%= label_tag :body, 'Body:' %>
-        <%= text_area_tag :body %>
-      </div>
-      <div>
-        <%= submit_tag 'Send' %>
-      </div>
-    <% end %>
-  </div>
-
   <div class="threads">
+    <div class="reply-form">
+      <p>Reply</p>
+      <%= form_tag(tickets_reply_url, method: "post") do %>
+      <% hidden_field_tag :id, @ticket["id"]%>
+        <div>
+          <%= label_tag :from, 'From:' %>
+          <%= text_field_tag :from, "support@thejaingroup.zohodesk.in" %>
+        </div>
+        <div>
+          <%= label_tag :to, 'To:' %>
+          <%= text_field_tag :to, @ticket["email"] %>
+        </div>
+        <div>
+          <%= label_tag :cc, 'CC:' %>
+          <%= text_field_tag :cc %>
+        </div>
+        <div>
+          <%= label_tag :body, 'Body:' %>
+          <%= text_area_tag :body %>
+        </div>
+        <%= submit_tag "Send" %>
+      <% end %>
+    </div>
+
     <% @threads["data"].each_with_index do |thread, index| %>
       <div class="thread" onclick="toggleThreadDetails(this)">
         <div class="thread-summary">
@@ -164,8 +225,12 @@
     var isVisible = details.style.display === 'block';
     details.style.display = isVisible ? 'none' : 'block';
   }
-  function showReplyForm() {
-    var form = document.getElementById('reply-form');
-    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  function showReplyForm(){
+    var replyForm= document.getElementsByClassName('reply-form')[0];
+    if(replyForm.style.display == "none"||replyForm.style.display == "")
+      replyForm.style.display ='block'
+    else
+      replyForm.style.display ='none'  
   }
+
 </script>

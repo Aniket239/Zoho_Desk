@@ -31,7 +31,34 @@ class TicketsController < ApplicationController
   end
 
   def reply
+    ticket_id = params[:id]
+    access_token = cookies[:access_token]
+    api_url = "https://desk.zoho.in/api/v1/tickets/#{ticket_id}/sendReply"
+    reply_data = {
+      fromEmailAddress: params[:from],
+      to: params[:to],
+      cc: params[:cc],
+      content: params[:body],
+      contentType: 'plainText' # Assuming the content type is HTML; adjust as needed
+    }
+    p "reply data"
+    p reply_data
 
+    # Make the API request to Zoho Desk
+    response = HTTParty.post(api_url,
+                             headers: {
+                               'Authorization' => "Zoho-oauthtoken #{access_token}",
+                               'Content-Type' => 'application/json'
+                             },
+                             body: reply_data.to_json)
+
+    # Handle the response
+    if response.code == 200
+      flash[:notice] = "Reply sent successfully"
+      redirect_to tickets_index_path # Redirect to an appropriate path
+    else
+      flash[:alert] = "Failed to send reply"
+    end
   end
 
 end
