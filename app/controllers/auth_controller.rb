@@ -30,6 +30,7 @@ class AuthController < ApplicationController
         cookies[:access_token] = access_token
         refresh_token = response.parsed_response['refresh_token']
         cookies[:refresh_token] = refresh_token
+        cookies.encrypted[:expire_time]=response.parsed_response['expires_in']
         p "access token"
         p access_token
         p "access token"
@@ -57,7 +58,7 @@ class AuthController < ApplicationController
           cookies[:access_token] = new_access_token
           new_refresh_token = response.parsed_response['refresh_token']
           cookies[:refresh_token] = new_refresh_token if new_refresh_token
-          p "New access token: #{new_access_token}"
+          p "New access token generated"
           return new_access_token
         else
           p "Failed to refresh token"

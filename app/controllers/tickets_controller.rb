@@ -23,7 +23,8 @@ class TicketsController < ApplicationController
     @ticket = ticket_response.parsed_response
     @threads = threads_response.parsed_response
     if @ticket["erroCode"]=="INVALID_OAUTH" || @threads["errorCode"] == "INVALID_OAUTH"
-      redirect_to root_path
+      refresh_access_token
+      p refresh_access_token
     end
     p "Ticket response:"
     p @ticket
