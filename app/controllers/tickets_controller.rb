@@ -8,8 +8,7 @@ class TicketsController < ApplicationController
         sorted_tickets = tickets_data["data"].sort_by { |ticket| -ticket["ticketNumber"].to_i }
         tickets_data["data"] = sorted_tickets
       end
-      @tickets = tickets_data
-      p @tickets
+      @tickets = tickets_data 
     else
       redirect_to root_path
     end
@@ -26,16 +25,12 @@ class TicketsController < ApplicationController
       refresh_access_token
       p refresh_access_token
     end
-    p "Ticket response:"
-    p @ticket
-    p "Threads response:"
-    p @threads
+    @ticket
+    @threads
   end
 
   def reply
     ticket_id = cookies[:ticket_id]
-    p "ticket id"
-    p ticket_id
     access_token = cookies[:access_token]
     api_url = "https://desk.zoho.in/api/v1/tickets/#{ticket_id}/sendReply"
     reply_data = {
@@ -46,8 +41,6 @@ class TicketsController < ApplicationController
       content: params[:body],
       contentType: 'plainText' # Assuming the content type is HTML; adjust as needed
     }
-    p "reply data"
-    p reply_data
     response = HTTParty.post(api_url,
                              headers: {
                                'Authorization' => "Zoho-oauthtoken #{access_token}",

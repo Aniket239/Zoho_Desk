@@ -31,12 +31,6 @@ class AuthController < ApplicationController
         refresh_token = response.parsed_response['refresh_token']
         cookies[:refresh_token] = refresh_token
         cookies.encrypted[:expire_time]=response.parsed_response['expires_in']
-        p "access token"
-        p access_token
-        p "access token"
-        p "refresh token"
-        p refresh_token
-        p "refresh token"
         redirect_to tickets_index_path, notice: 'You have been successfully authenticated!'
       end
 
