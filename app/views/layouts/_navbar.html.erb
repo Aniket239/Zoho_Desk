@@ -1,23 +1,92 @@
+<style>
+.navbar {
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    padding:2% 2.5%;
+}
+
+.nav-items{
+    display:flex;
+    flex-direction:row;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.nav-items-left-right{
+    display:flex;
+    flex-direction:row;
+    align-items:center; 
+}
+
+.nav-items-left-right h2{
+    padding:0 15px 0 0;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    color: #007bff; 
+}
+
+.nav-link {
+    color: #555; 
+    transition: color 0.2s; 
+    text-decoration:none;
+}
+
+.nav-link:hover {
+    color: #007bff; 
+}
+
+.navbar-nav {
+    display: flex;
+    width: 100%;
+    justify-content: space-between; 
+    list-style: none; 
+    padding: 0; 
+}
+
+.nav-item {
+    padding: 0 1.2rem;
+    list-style-type: none; 
+    font-weight:600;
+}
+
+.material-symbols-outlined {
+    vertical-align: middle; 
+    font-size: 1.5rem; 
+}
+
+@media (min-width: 992px) {
+    .navbar-nav {
+        flex-direction: row; 
+    }
+}
+</style>
+
+
 <nav class="navbar">
-  <div class="nav-container">
-    <h2>Post Sales</h2>
-      <ul class="nav-items">
-        <li class="nav-item">
-          <%= link_to 'Tickets', tickets_index_path, class: "nav-link" %>
-        </li>
-        <li class="nav-item">
-          <%= link_to 'Customers', class: "nav-link"%>
-        </li>
-        <li class="nav-item">
-          <%= link_to 'Settings', class: "nav-link" do %>
-          <span class="material-symbols-outlined">settings</span>
-          <% end %>
-        </li>
-        <li class="nav-item">
-          <%= link_to 'User Account', class: "nav-link" do %>
-          <span class="material-symbols-outlined">person</span>
-          <% end %>
-        </li>
-      </ul>
-  </div>
+      <div class="nav-items">
+        <div class="nav-items-left-right">
+            <h2>Post Sales</h2>
+            <p class="nav-item">
+                <%= link_to 'Tickets', tickets_index_path, class: "nav-link" %>
+            </p>
+            <p class="nav-item">
+                <%= link_to 'Customers',"#", class: "nav-link" %>
+            </p>
+        </div>
+        <div class="nav-items-left-right">
+            <p class="nav-item">
+                <%= link_to 'Settings', class: "nav-link" do %>
+                <span class="material-symbols-outlined">settings</span>
+                <% end %>
+            </p>
+            <p class="nav-item">
+                <%= link_to 'User Account', class: "nav-link" do %>
+                <span class="material-symbols-outlined">person</span>
+                <% end %>
+            </p>
+        </div>
+      </div>
 </nav>
