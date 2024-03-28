@@ -27,15 +27,40 @@ class AuthController < ApplicationController
           grant_type: 'authorization_code'
         })
         access_token = response.parsed_response['access_token']
+        cookies[:access_token] = access_token
         refresh_token = response.parsed_response['refresh_token']
+        cookies[:refresh_token] = refresh_token
         p "access token"
         p access_token
         p "access token"
         p "refresh token"
         p refresh_token
         p "refresh token"
-        cookies[:access_token] = access_token
         redirect_to tickets_index_path, notice: 'You have been successfully authenticated!'
       end
 
+      def refresh_access_token
+        client_id = '1000.RMODJ3TXVWLVGROZQR2CYKWAQQL4RK'
+        client_secret = '7241a1ead9a8513ebea78500298e54fb2db44cee9d'
+        refresh_token = cookies[:refresh_token]
+        token_url = "https://accounts.zoho.in/oauth/v2/token"
+
+        response = HTTParty.post(token_url, body: {
+          refresh_token: refresh_token,
+          client_id: client_id,
+          client_secret: client_secret,
+          grant_type: 'refresh_token'
+        })
+
+        if response.code == 200
+          new_access_token = response.parsed_response['access_token']
+          cookies[:access_token] = new_access_token
+          new_refresh_token = response.parsed_response['refresh_token']
+          cookies[:refresh_token] = new_refresh_token if new_refresh_token
+          p "New access token: #{new_access_token}"
+          return new_access_token
+        else
+          p "Failed to refresh token"
+        end
+      end
 end

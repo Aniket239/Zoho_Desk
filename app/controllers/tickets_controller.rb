@@ -55,7 +55,7 @@ class TicketsController < ApplicationController
                              body: reply_data.to_json)
 
     if response.code == 200
-      p "successful"
+      p "success"
       redirect_to action: :threads, id: ticket_id
     else
       flash[:alert] = "Failed to send reply"
