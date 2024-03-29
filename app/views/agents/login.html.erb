@@ -1,0 +1,10 @@
+<%= form_tag(agents_login_path, method: :post) do %>
+  <div class="field">
+    <%= label_tag :email, "Email" %>
+    <%= text_field_tag :email, "", placeholder: "Enter your email" %>
+  </div>
+
+  <div class="actions">
+    <%= submit_tag "Log in" %>
+  </div>
+<% end %>

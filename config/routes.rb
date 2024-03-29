@@ -13,4 +13,6 @@ Rails.application.routes.draw do
   post 'tickets/reply'
   get 'agents/allAgents'
   post 'agents/allAgents'
+  get 'agents/login'
+  post 'agents/login'
 end
