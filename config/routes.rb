@@ -11,4 +11,6 @@ Rails.application.routes.draw do
   post 'tickets/edit'
   get 'tickets/reply'
   post 'tickets/reply'
+  get 'agents/allAgents'
+  post 'agents/allAgents'
 end
