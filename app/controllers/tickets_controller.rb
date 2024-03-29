@@ -33,6 +33,7 @@ class TicketsController < ApplicationController
         tickets_data["data"] = sorted_tickets
       end
       @tickets = tickets_data 
+      p @tickets
     else
       refresh_access_token
       redirect_to tickets_index_path
