@@ -27,7 +27,7 @@ class TicketsController < ApplicationController
     agent_id = cookies.encrypted[:agent_id]
     access_token = cookies[:access_token]
     tickets = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{agent_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-    # if tickets.code == 200
+    if tickets.code == 200
       tickets_data = tickets.parsed_response
       if tickets_data["data"].present?
         sorted_tickets = tickets_data["data"].sort_by { |ticket| -ticket["ticketNumber"].to_i }
@@ -35,10 +35,10 @@ class TicketsController < ApplicationController
       end
       @tickets = tickets_data 
       p @tickets
-    # else
-    #   refresh_access_token
-    #   redirect_to tickets_index_path
-    # end
+    else
+      refresh_access_token
+      redirect_to tickets_index_path
+    end
   end
   def threads
     ticket_id = params[:id]
@@ -50,7 +50,6 @@ class TicketsController < ApplicationController
     @threads = threads_response.parsed_response
     if @ticket["erroCode"]=="INVALID_OAUTH" || @threads["errorCode"] == "INVALID_OAUTH"
       refresh_access_token
-      p refresh_access_token
     end
     p @ticket
     p @threads
@@ -66,7 +65,7 @@ class TicketsController < ApplicationController
       to: params[:to],
       cc: params[:cc],
       content: params[:body],
-      contentType: 'plainText' # Assuming the content type is HTML; adjust as needed
+      contentType: 'plainText'
     }
     response = HTTParty.post(api_url,
                              headers: {
@@ -79,7 +78,6 @@ class TicketsController < ApplicationController
       p "success"
       redirect_to action: :threads, id: ticket_id
     else
-      flash[:alert] = "Failed to send reply"
       p "error"
       p response.code
     end
