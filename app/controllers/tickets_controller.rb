@@ -44,7 +44,7 @@ class TicketsController < ApplicationController
     ticket_id = params[:id]
     cookies[:ticket_id] = ticket_id
     access_token = cookies[:access_token]
-    ticket_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}?assigneeId=#{agent_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+    ticket_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
     threads_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads",headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
     @ticket = ticket_response.parsed_response
     @threads = threads_response.parsed_response
