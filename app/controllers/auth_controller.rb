@@ -68,7 +68,6 @@ class AuthController < ApplicationController
     cookies[:access_token] = access_token
     refresh_token = response.parsed_response['refresh_token']
     cookies[:refresh_token] = refresh_token
-    cookies.encrypted[:expire_time]=response.parsed_response['expires_in']
     redirect_to agents_login_path, notice: 'You have been successfully authenticated!'
   end
 end
