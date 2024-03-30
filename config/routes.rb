@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
   get '/auth', to: 'auth#authorize'
   get '/auth/callback', to: 'auth#callback'
+
+  post '/webhook/receive', to: 'webhooks#receive'
+
   root 'tickets#login'
   post 'tickets/login'
   get 'tickets/index'
