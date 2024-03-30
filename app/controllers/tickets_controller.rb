@@ -24,26 +24,29 @@ class TicketsController < ApplicationController
     end
   end
   def index
-    zoho_desk_service = ZohoDeskApiService.new(cookies[:access_token])
-    response = zoho_desk_service.list_tickets
-    if response.code == 200
-      tickets_data = response.parsed_response
+    p "======================= agent_id ================="
+    p agent_id = cookies.encrypted[:agent_id]
+    p "======================= agent_id ================="
+    access_token = cookies[:access_token]
+    tickets = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{agent_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+    # if tickets.code == 200
+      tickets_data = tickets.parsed_response
       if tickets_data["data"].present?
         sorted_tickets = tickets_data["data"].sort_by { |ticket| -ticket["ticketNumber"].to_i }
         tickets_data["data"] = sorted_tickets
       end
       @tickets = tickets_data 
       p @tickets
-    else
-      refresh_access_token
-      redirect_to tickets_index_path
-    end
+    # else
+    #   refresh_access_token
+    #   redirect_to tickets_index_path
+    # end
   end
   def threads
     ticket_id = params[:id]
     cookies[:ticket_id] = ticket_id
     access_token = cookies[:access_token]
-    ticket_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+    ticket_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}?assigneeId=#{agent_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
     threads_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads",headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
     @ticket = ticket_response.parsed_response
     @threads = threads_response.parsed_response

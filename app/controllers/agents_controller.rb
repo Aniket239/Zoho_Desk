@@ -19,7 +19,10 @@ class AgentsController < ApplicationController
         p agent
         current_agent = agent["data"].find { |agent| agent["emailId"] == email }
         if current_agent
+            p "======================== agent id ================="
             cookies.encrypted[:agent_id]=current_agent["id"]
+            p cookies.encrypted[:agent_id]
+            p "======================== agent id ================="
             redirect_to tickets_index_path
         else
             p "Agent not found"
