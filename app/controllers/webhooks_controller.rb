@@ -3,10 +3,8 @@ class WebhooksController < ApplicationController
   
     def receive
       request_data = params
-        if request_data.dig('_json', 0, 'eventType') == 'Ticket_Update'
-        p "==================== webhook data ================="
-        p ticket_update_event = request_data['_json'][0]
-        p "==================== webhook data ================="
+      if request_data.dig('_json', 0, 'eventType') == 'Ticket_Update'
+        ticket_update_event = request_data.dig('_json', 0)
         process_ticket_update(ticket_update_event)
       else
         p "Received a non-ticket update event"
@@ -19,9 +17,17 @@ class WebhooksController < ApplicationController
     def process_ticket_update(event)
       p "Processing Ticket Update Event"
       payload = event['payload'] || {}
-      p "Ticket ID: #{payload['id']}"
-      p "Ticket Status: #{payload['status']}"
-      p "Ticket assigned: #{payload['customFields']['Assignee']}"
+      ticket_number = payload['ticketNumber']
+      ticket_id = payload['id']
+      ticket_status = payload['status']
+      assigned_to = payload.dig('customFields', 'Assignee')
+      content = payload['firstThread']['content']
+  
+      p "Ticket Number: #{ticket_number}"
+      p "Ticket ID: #{ticket_id}"
+      p "content: #{content}"
+      p "Ticket Status: #{ticket_status}"
+      p "Assigned To: #{assigned_to}"
     end
   end
   
