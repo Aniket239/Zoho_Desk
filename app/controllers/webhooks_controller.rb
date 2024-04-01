@@ -22,11 +22,9 @@ class WebhooksController < ApplicationController
       ticket_id = payload['id']
       ticket_status = payload['status']
       assigned_to = payload.dig('customFields', 'Assignee')
-      content = payload['firstThread']['content']
   
       p "Ticket Number: #{ticket_number}"
       p "Ticket ID: #{ticket_id}"
-      p "content: #{content}"
       p "Ticket Status: #{ticket_status}"
       p "Assigned To: #{assigned_to}"
     end
