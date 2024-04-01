@@ -15,6 +15,7 @@ class WebhooksController < ApplicationController
     private
   
     def process_ticket_update(event)
+      refresh_token='1000.2b9b9cbdcdadc05749f6d17f19c18ede.7f0255d317ca218bf5c1c56e8d4cdbad'
       p "Processing Ticket Update Event"
       payload = event['payload'] || {}
       ticket_number = payload['ticketNumber']
