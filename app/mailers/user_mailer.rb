@@ -1,5 +1,5 @@
 class UserMailer < ApplicationMailer
-    default from: 'system.admin@thejaingroup.com'
+    default from: 'aniketbiswas2392001@gmail.com'
 
     def testEmail
         p"working"
