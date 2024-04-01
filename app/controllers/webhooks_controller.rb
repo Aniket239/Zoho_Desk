@@ -22,11 +22,16 @@ class WebhooksController < ApplicationController
       ticket_id = payload['id']
       ticket_status = payload['status']
       assigned_to = payload.dig('customFields', 'Assignee')
+      assigned_from_pallavita = payload.dig('customFields','Pallavita Assigns To')
   
       p "Ticket Number: #{ticket_number}"
       p "Ticket ID: #{ticket_id}"
       p "Ticket Status: #{ticket_status}"
-      p "Assigned To: #{assigned_to}"
+      if assigned_to!= nil
+        p "Assigned To: #{assigned_to}"
+      elsif assigned_from_pallavita!= nil
+        p "Assigned To: #{assigned_to}"
+      end  
       WebhookService.process_ticket(ticket_id,refresh_token)
     end
   end
