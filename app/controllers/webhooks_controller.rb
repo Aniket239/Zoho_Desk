@@ -30,7 +30,7 @@ class WebhooksController < ApplicationController
       if assigned_to!= nil
         p "Assigned To: #{assigned_to}"
       elsif assigned_from_pallavita!= nil
-        p "Assigned To: #{assigned_to}"
+        p "Assigned To: #{assigned_from_pallavita}"
       end  
       WebhookService.process_ticket(ticket_id,refresh_token)
     end
