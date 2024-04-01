@@ -18,4 +18,9 @@ Rails.application.routes.draw do
   post 'agents/allAgents'
   get 'agents/login'
   post 'agents/login'
+
+  get 'tickets/emailTest'
+  post 'tickets/emailTest'
+  get 'tickets/emailTest', to: 'tickets#emailTest'
+
 end
