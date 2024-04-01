@@ -27,6 +27,7 @@ class WebhooksController < ApplicationController
       p "Ticket ID: #{ticket_id}"
       p "Ticket Status: #{ticket_status}"
       p "Assigned To: #{assigned_to}"
+      
     end
   end
   
