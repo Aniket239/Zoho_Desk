@@ -1,7 +1,7 @@
 class UserMailer < ApplicationMailer
-    def testEmail(email_chain, subject)
-      @content = email_chain
-      mail(to: "system4@thejaingroup.com", subject: subject, body: @content, content_type: "text/html")
+    def testEmail(decoded_content, subject)
+      @contents = decoded_content
+      mail(to: "system4@thejaingroup.com", subject: subject, body: @contents, content_type: "text/html")
     end
   end
   
