@@ -1,4 +1,5 @@
 class WebhooksController < ApplicationController
+    require 'mail'
     skip_before_action :verify_authenticity_token
   
     def receive
@@ -37,38 +38,33 @@ class WebhooksController < ApplicationController
       client_id = '1000.RMODJ3TXVWLVGROZQR2CYKWAQQL4RK'
       client_secret = '7241a1ead9a8513ebea78500298e54fb2db44cee9d'
       token_url = "https://accounts.zoho.in/oauth/v2/token"
-  
       response = HTTParty.post(token_url, body: {
         refresh_token: refresh_token,
         client_id: client_id,
         client_secret: client_secret,
         grant_type: 'refresh_token'
       })
-  
       if response.code == 200
         access_token = response.parsed_response['access_token']
         threads_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-        contents = []
-        filter_contents = []
-        threads_response["data"].each do |thread|
-          thread_id = thread["id"]
+        threads = threads_response["data"]
+        threads.each do |thread|
+            thread_id = thread["id"]
+            p "Thread ID: #{thread_id}"
           content_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads/#{thread_id}/originalContent", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
           content = content_response.parsed_response["content"]
-          contents << content
-          pattern = /charset="UTF-8"(.*?)charset="UTF-8"/m
-          filter_content = content.scan(pattern)
-          if filter_content.any?
-            filter_contents << filter_content.first.first
-          else
-            p "No matches found"
-          end
+          p "========================================= content ========================================"
+          p content
+          p "========================================= content ========================================"
+          
+          decoded_content = Mail::Encodings::QuotedPrintable.decode(content)
+          p "========================================= decoded content ========================================"
+          p decoded_content
+          p "========================================= decoded content ========================================"
+          UserMailer.testEmail(decoded_content, subject).deliver_now
+        else
+          p "No threads found for ticket #{ticket_id}"
         end
-        filter_contents.each do |filter_content|
-          p "============================================= extracted data ===================================================="
-          p filter_content
-          p "============================================= extracted data ===================================================="
-        end
-        # UserMailer.testEmail(filter_contents,subject).deliver_now
       else
         p "Failed to refresh token"
       end

@@ -192,6 +192,7 @@ DEPENDENCIES
   httparty
   jbuilder (~> 2.0)
   jquery-rails
+  mail
   rails (= 4.2.8)
   rest-client
   sass-rails (~> 5.0)
