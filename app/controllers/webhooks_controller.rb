@@ -48,16 +48,20 @@ class WebhooksController < ApplicationController
       if response.code == 200
         access_token = response.parsed_response['access_token']
         threads_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-        email_chain = ''
+  
+        contents = []
         threads_response["data"].each do |thread|
           thread_id = thread["id"]
           content_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads/#{thread_id}/originalContent", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
           content = content_response.parsed_response["content"]
-          pattern = /charset="UTF-8"(.*?)charset="UTF-8"/m
-          filter_content = content.scan(pattern).map(&:first)
-          email_chain += filter_content.join("\n\n-----------------\n\n") + "\n\n-----------------\n\n" # Separator between emails
+          contents << content
         end
-        UserMailer.testEmail(email_chain, subject).deliver_now
+          decoded_content = Mail::Encodings::QuotedPrintable.decode(contents[0])
+          formatted_content = decoded_content.gsub(/=\r\n/, '').encode('UTF-8', invalid: :replace, undef: :replace, replace: '?')
+          p "============================ index ====================================="
+          p charset_index = formatted_content.index('charset="UTF-8"')
+          p "============================ index ====================================="
+        UserMailer.testEmail(formatted_content, subject).deliver_now
       else
         p "Failed to refresh token"
       end
