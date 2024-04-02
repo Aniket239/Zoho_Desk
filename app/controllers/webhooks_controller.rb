@@ -59,9 +59,11 @@ class WebhooksController < ApplicationController
           decoded_content = Mail::Encodings::QuotedPrintable.decode(contents[0])
           formatted_content = decoded_content.gsub(/=\r\n/, '').encode('UTF-8', invalid: :replace, undef: :replace, replace: '?')
           p "============================ index ====================================="
-          p charset_index = formatted_content.index('charset="UTF-8"')
+          p charset_index = formatted_content.rindex('charset="UTF-8"')
+          p "============================ cut string ====================================="
+          p cut_string = formatted_content.slice(charset_index,formatted_content.length) if charset_index
           p "============================ index ====================================="
-        UserMailer.testEmail(formatted_content, subject).deliver_now
+        UserMailer.testEmail(cut_string, subject).deliver_now
       else
         p "Failed to refresh token"
       end
