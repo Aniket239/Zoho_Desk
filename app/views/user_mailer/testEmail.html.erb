@@ -1,22 +1,5 @@
-     <div class="ticket-container">
-      <div class="ticket-info">
-        <h1>Ticket #<%= @ticket["ticketNumber"] %> - <%= @ticket["subject"] %></h1>
-      </div>
-        <% @threads["data"].each_with_index do |thread, index| %>
-          <div class="thread" onclick="toggleThreadDetails(this)">
-            <div class="thread-summary">
-              <p><strong>Author Name:</strong> <%= thread["author"]["name"] %></p>
-              <% summary_parts = thread["summary"].partition("How would you rate our customer service? Good Bad") %>
-              <p><strong>Summary:</strong> <%= summary_parts.first %></p>
-              <% if summary_parts.second %>
-                <p><%= summary_parts.second %></p>
-              <% end %>
-              <p><strong>Created:</strong> <%= time_ago_in_words(Time.parse(thread["createdTime"])) %> ago</p>
-              <% if thread["cc"].present? %>
-                <p><strong>CC:</strong> <%= thread["cc"] %></p>
-              <% end %>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    
+<div>
+    <% @contents.each do |content|%>
+    <%= content %><br><hr><br>
+    <% end %>
+</div>

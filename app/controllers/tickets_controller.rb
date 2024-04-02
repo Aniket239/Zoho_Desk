@@ -82,8 +82,4 @@ class TicketsController < ApplicationController
       p response.code
     end
   end
-  def emailTest
-    UserMailer.testEmail.deliver_now
-    redirect_to tickets_index_path
-  end
 end

@@ -26,16 +26,16 @@ class WebhookService
 
       p "============================ Content =============================="
       p contents
-      extracted_content_data = contents.map do |content|
-        date_match = content.match(/Date: (.+?)(\n|\r\n)/)
-        charset_match = content.match(/charset="UTF-8"\n\n(.*)/m)
-        date = date_match[1] if date_match
-        charset = charset_match[1] if charset_match
+      # extracted_content_data = contents.map do |content|
+      #   date_match = content.match(/Date: (.+?)(\n|\r\n)/)
+      #   charset_match = content.match(/charset="UTF-8"\n\n(.*)/m)
+      #   date = date_match[1] if date_match
+      #   charset = charset_match[1] if charset_match
       
-        { date: date, charset: charset }
-      end
-      p "================================= extracted content ====================================="
-      p extracted_content_data
+      #   { date: date, charset: charset }
+      # end
+      # p "================================= extracted content ====================================="
+      # p extracted_content_data
     else
       p "Failed to refresh token"
     end
