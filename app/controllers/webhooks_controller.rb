@@ -49,17 +49,28 @@ class WebhooksController < ApplicationController
         access_token = response.parsed_response['access_token']
         threads_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
         contents = []
+        filter_contents = []
         threads_response["data"].each do |thread|
           thread_id = thread["id"]
           content_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads/#{thread_id}/originalContent", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-          contents << content_response.parsed_response["content"]
+          content = content_response.parsed_response["content"]
+          contents << content
+          pattern = /charset="UTF-8"(.*?)charset="UTF-8"/m
+          filter_content = content.scan(pattern)
+          if filter_content.any?
+            filter_contents << filter_content.first.first
+          else
+            p "No matches found"
+          end
         end
-        p "============================ Content =============================="
-        p contents
-        UserMailer.testEmail(contents,subject).deliver_now
+        filter_contents.each do |filter_content|
+          p "============================================= extracted data ===================================================="
+          p filter_content
+          p "============================================= extracted data ===================================================="
+        end
+        # UserMailer.testEmail(filter_contents,subject).deliver_now
       else
         p "Failed to refresh token"
       end
     end
   end
-  
