@@ -23,28 +23,18 @@ class WebhooksController < ApplicationController
       ticket_id = payload['id']
       ticket_status = payload['status']
       subject = payload['subject']
-      assigned_from_rimi = payload.dig('customFields', 'Rimi Assigns To')
-      assigned_from_pallavita = payload.dig('customFields','Pallavita Assigns To')
-      assigned_from_sarnali = payload.dig('customFields','Sarnali Assigns To')
-      "Ticket Number: #{ticket_number}"
-      "Ticket ID: #{ticket_id}"
-      "Ticket Status: #{ticket_status}"
-      "Subject: #{subject}"
+      assign_to = payload.dig('customFields', 'Assign To')
+      p "Ticket Number: #{ticket_number}"
+      p "Ticket ID: #{ticket_id}"
+      p "Ticket Status: #{ticket_status}"
+      p "Subject: #{subject}"
 
-      if assigned_from_rimi!= nil
-        p "Assigned To: #{assigned_from_rimi}"
-        assigned_by = "Sent By Rimi"
-        email = assigned_from_pallavita.slice(assigned_from_rimi.index(" ")+1,assigned_from_rimi.length)
-
-      elsif assigned_from_pallavita!= nil
-        p "Assigned To: #{assigned_from_pallavita}"
-        assigned_by = "Sent By Pallavita"
-        email = assigned_from_pallavita.slice(assigned_from_pallavita.index(" ")+1,assigned_from_pallavita.length)
-
-      elsif assigned_from_sarnali!= nil
-        p "Assigned To: #{assigned_from_sarnali}"
-        assigned_by = "Sent By Sarnali"
-        email = assigned_from_pallavita.slice(assigned_from_sarnali.index(" ")+1,assigned_from_sarnali.length)
+      if assign_to!= nil
+        p "Assigned To: #{assign_to}"
+        # assignd_by = "Sent By Rimi"
+        p "======================== email ==================================="
+        p email = assign_to.slice(assign_to.rindex(" ")+1,assign_to.length)
+        p "======================== email ==================================="
       end  
       client_id = '1000.RMODJ3TXVWLVGROZQR2CYKWAQQL4RK'
       client_secret = '7241a1ead9a8513ebea78500298e54fb2db44cee9d'
@@ -57,8 +47,11 @@ class WebhooksController < ApplicationController
       })
 
       if response.code == 200
-        access_token = response.parsed_response['access_token']
-        threads_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+        p "========================= access token ========================================"
+        p access_token = response.parsed_response['access_token']
+        p "========================= access token ========================================"
+        p threads_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+        p "============================== thread response ===================================="
         contents = []
         threads_response["data"].each do |thread|
           thread_id = thread["id"]
@@ -93,7 +86,7 @@ class WebhooksController < ApplicationController
           end
           contents << content_parsed
         end
-        UserMailer.testEmail(contents[0],subject,email,assigned_by).deliver_now
+        UserMailer.testEmail(contents[0],subject,email).deliver_now
       else
         p "Failed to refresh token"
       end
