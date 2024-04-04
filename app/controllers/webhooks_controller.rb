@@ -56,21 +56,7 @@ class WebhooksController < ApplicationController
           content = content_response.parsed_response["content"]
           contents << content
         end
-          p "================================ decoded content ================================"
-          p decoded_content = Mail::Encodings::QuotedPrintable.decode(contents[0])
-          p "================================ decoded content ================================"
-          formatted_content = decoded_content.gsub(/=\r\n/, '').encode('UTF-8', invalid: :replace, undef: :replace, replace: '?')
-          if formatted_content.rindex('charset="UTF-8"')
-            cut_string = formatted_content.slice(formatted_content.rindex('charset="UTF-8"'),formatted_content.length) 
-          elsif formatted_content.rindex('<!DOCTYPE')
-            cut_string = formatted_content.slice(formatted_content.rindex('<!DOCTYPE'),formatted_content.length) 
-          end
-            replacements = {"charset=\"UTF-8\"" => "","=\\" => "", "3D\"\"" => " ","=20" => " ","=C2=A0" => " ","=E2=80=AF" => " ","=E2=80=99" => "'","=E2=80=9D" => '"',"=E2=80=98" => "'","=E2=80=9C" => '"',"=E2=80=9E" => '"',"=E2=80=9F" => '"',"=E2=80=9A" => "'","=E2=80=9B" => "'","=E2=80=B3" => "'","=E2=80=B2" => "'","=E2=80=B4" => "'","=E2=80=B5" => "'","=E2=80=B6" => "'","=E2=80=B7" => "'","=E2=80=B8" => "'","=E2=80=B9" => "'","=E2=80=BA" => "'","=E2=80=BB" => "'","=E2=80=BC" => "'","=E2=80=BD" => "'","=E2=80=BE" => "'","=E2=80=BF" => "'"}
-            p "============================ proper string ====================================="
-            proper_string = cut_string.gsub(Regexp.union(replacements.keys), replacements)
-            cleaned_string = proper_string.gsub(/= +/, '')
-          p "============================ proper string ====================================="
-        UserMailer.testEmail(cleaned_string, subject).deliver_now
+        UserMailer.testEmail(contents, subject).deliver_now
       else
         p "Failed to refresh token"
       end

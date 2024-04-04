@@ -1,7 +1,7 @@
 class UserMailer < ApplicationMailer
-    def testEmail(original_email, subject)
-      @contents = original_email
-      mail(to: "system4@thejaingroup.com", subject:subject, content:'html')
+    def testEmail(content_mail, subject)
+      @contents = content_mail
+      mail(to: "system4@thejaingroup.com", subject:subject, content:'text/html')
     end
   end
   
