@@ -23,22 +23,32 @@ class WebhooksController < ApplicationController
       ticket_id = payload['id']
       ticket_status = payload['status']
       subject = payload['subject']
-      assigned_to = payload.dig('customFields', 'Assignee')
+      assigned_from_rimi = payload.dig('customFields', 'Rimi Assigns To')
       assigned_from_pallavita = payload.dig('customFields','Pallavita Assigns To')
-  
-      p "Ticket Number: #{ticket_number}"
-      p "Ticket ID: #{ticket_id}"
-      p "Ticket Status: #{ticket_status}"
-      p "Subject: #{subject}"
-      if assigned_to!= nil
-        p "Assigned To: #{assigned_to}"
+      assigned_from_sarnali = payload.dig('customFields','Sarnali Assigns To')
+      "Ticket Number: #{ticket_number}"
+      "Ticket ID: #{ticket_id}"
+      "Ticket Status: #{ticket_status}"
+      "Subject: #{subject}"
+
+      if assigned_from_rimi!= nil
+        p "Assigned To: #{assigned_from_rimi}"
+        assigned_by = "Sent By Rimi"
+        email = assigned_from_pallavita.slice(assigned_from_rimi.index(" ")+1,assigned_from_rimi.length)
+
       elsif assigned_from_pallavita!= nil
         p "Assigned To: #{assigned_from_pallavita}"
+        assigned_by = "Sent By Pallavita"
+        email = assigned_from_pallavita.slice(assigned_from_pallavita.index(" ")+1,assigned_from_pallavita.length)
+
+      elsif assigned_from_sarnali!= nil
+        p "Assigned To: #{assigned_from_sarnali}"
+        assigned_by = "Sent By Sarnali"
+        email = assigned_from_pallavita.slice(assigned_from_sarnali.index(" ")+1,assigned_from_sarnali.length)
       end  
       client_id = '1000.RMODJ3TXVWLVGROZQR2CYKWAQQL4RK'
       client_secret = '7241a1ead9a8513ebea78500298e54fb2db44cee9d'
       token_url = "https://accounts.zoho.in/oauth/v2/token"
-  
       response = HTTParty.post(token_url, body: {
         refresh_token: refresh_token,
         client_id: client_id,
@@ -56,45 +66,34 @@ class WebhooksController < ApplicationController
           content = content_response.parsed_response["content"]
           mail = Mail.read_from_string(content)
           if mail.multipart?
-            # Look for HTML and plain text parts
             html_part = mail.html_part
             text_part = mail.text_part
-          
-            # Prioritize HTML content if available, otherwise use plain text
             content_parsed = if html_part
-                               html_part.decoded
-                             elsif text_part
-                               text_part.decoded
-                             else
-                               # If there's no HTML or plain text part, use the first part as a fallback
-                               mail.parts.first.decoded
-                             end
-          
-            # Handle specific multipart types like 'multipart/related' or 'multipart/mixed'
-            mail.parts.each do |part|
-              if part.mime_type.start_with?('image/') && part.cid.present?
-                filename = part.filename || "image_#{part.cid}.#{part.mime_type.split('/').last}"
-            
-                # Save the embedded image
-                File.open(Rails.root.join('public', 'uploads', filename), 'wb') do |file|
+                      html_part.decoded
+                    elsif text_part
+                      text_part.decoded
+                    else
+                      mail.parts.first.decoded
+                    end
+              mail.parts.each do |part|
+                if part.mime_type.start_with?('image/') && part.cid.present?
+                  filename = part.filename || "image_#{part.cid}.#{part.mime_type.split('/').last}"
+                  File.open(Rails.root.join('public', 'uploads', filename), 'wb') do |file|
                   file.write(part.decoded)
-                end
-            
-                # If this image is referenced in the HTML part, replace the CID reference
-                if mail.html_part
+                  end
+                  if mail.html_part
                   cid_reference = "cid:#{part.cid}"
                   saved_file_path = "/uploads/#{filename}"
                   mail.html_part.body = mail.html_part.body.decoded.gsub(cid_reference, saved_file_path)
+                  end
                 end
               end
-            end
           else
-            # For non-multipart emails, just use the body
             content_parsed = mail.body.decoded
           end
           contents << content_parsed
         end
-        UserMailer.testEmail(contents[0], subject).deliver_now
+        UserMailer.testEmail(contents[0],subject,email,assigned_by).deliver_now
       else
         p "Failed to refresh token"
       end
