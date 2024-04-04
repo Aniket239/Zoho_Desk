@@ -99,4 +99,3 @@ class WebhooksController < ApplicationController
       end
     end
   end
-  
