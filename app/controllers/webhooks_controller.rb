@@ -59,7 +59,7 @@ class WebhooksController < ApplicationController
                        part = mail.html_part || mail.text_part
                        part.decoded
                      else
-                       mail.body.decoded
+                       mail.body.decode
                      end
           contents << content_parsed
         end
