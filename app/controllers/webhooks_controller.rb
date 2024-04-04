@@ -54,7 +54,14 @@ class WebhooksController < ApplicationController
           thread_id = thread["id"]
           content_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads/#{thread_id}/originalContent", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
           content = content_response.parsed_response["content"]
-          contents << content
+          mail = Mail.read_from_string(content)
+          content_parsed = if mail.multipart?
+                       part = mail.html_part || mail.text_part
+                       part.decoded
+                     else
+                       mail.body.decoded
+                     end
+          contents << content_parsed
         end
         UserMailer.testEmail(contents, subject).deliver_now
       else
