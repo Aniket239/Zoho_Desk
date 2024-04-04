@@ -55,15 +55,46 @@ class WebhooksController < ApplicationController
           content_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads/#{thread_id}/originalContent", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
           content = content_response.parsed_response["content"]
           mail = Mail.read_from_string(content)
-          content_parsed = if mail.multipart?
-                       part = mail.html_part || mail.text_part
-                       part.decoded
-                     else
-                       mail.body.decode
-                     end
+          if mail.multipart?
+            # Look for HTML and plain text parts
+            html_part = mail.html_part
+            text_part = mail.text_part
+          
+            # Prioritize HTML content if available, otherwise use plain text
+            content_parsed = if html_part
+                               html_part.decoded
+                             elsif text_part
+                               text_part.decoded
+                             else
+                               # If there's no HTML or plain text part, use the first part as a fallback
+                               mail.parts.first.decoded
+                             end
+          
+            # Handle specific multipart types like 'multipart/related' or 'multipart/mixed'
+            mail.parts.each do |part|
+              if part.mime_type.start_with?('image/') && part.cid.present?
+                filename = part.filename || "image_#{part.cid}.#{part.mime_type.split('/').last}"
+            
+                # Save the embedded image
+                File.open(Rails.root.join('public', 'uploads', filename), 'wb') do |file|
+                  file.write(part.decoded)
+                end
+            
+                # If this image is referenced in the HTML part, replace the CID reference
+                if mail.html_part
+                  cid_reference = "cid:#{part.cid}"
+                  saved_file_path = "/uploads/#{filename}"
+                  mail.html_part.body = mail.html_part.body.decoded.gsub(cid_reference, saved_file_path)
+                end
+              end
+            end
+          else
+            # For non-multipart emails, just use the body
+            content_parsed = mail.body.decoded
+          end
           contents << content_parsed
         end
-        UserMailer.testEmail(contents, subject).deliver_now
+        UserMailer.testEmail(contents[0], subject).deliver_now
       else
         p "Failed to refresh token"
       end
