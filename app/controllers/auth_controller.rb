@@ -1,6 +1,6 @@
 class AuthController < ApplicationController
   def authorize
-    client_id = '1000.RMODJ3TXVWLVGROZQR2CYKWAQQL4RK'
+    client_id = '1000.AX7K22BZK6OS35PYCBPO990IEX8ZPC'
     redirect_uri = 'http://localhost:3000/auth/callback'
     # Define all the scopes based on your needs
     scopes = [
@@ -51,8 +51,8 @@ class AuthController < ApplicationController
     authorization_code = params[:code]
     p "authorization code"
     p authorization_code
-    client_id = '1000.RMODJ3TXVWLVGROZQR2CYKWAQQL4RK'
-    client_secret = '7241a1ead9a8513ebea78500298e54fb2db44cee9d'
+    client_id = '1000.AX7K22BZK6OS35PYCBPO990IEX8ZPC'
+    client_secret = '69f04bf294dee8d3a69c77367163af960c83814985'
     redirect_uri = 'http://localhost:3000/auth/callback'
 
     token_url = "https://accounts.zoho.in/oauth/v2/token"

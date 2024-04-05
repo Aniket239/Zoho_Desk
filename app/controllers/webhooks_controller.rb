@@ -16,7 +16,7 @@ class WebhooksController < ApplicationController
     private
   
     def process_ticket_update(event)
-      refresh_token='1000.2b9b9cbdcdadc05749f6d17f19c18ede.7f0255d317ca218bf5c1c56e8d4cdbad'
+      refresh_token='1000.4ba1d6b204ab1c7ecc7d90428b9eda3e.5e14e172761ec699949d20447711e9db'
       p "Processing Ticket Update Event"
       payload = event['payload'] || {}
       ticket_number = payload['ticketNumber']
@@ -36,8 +36,8 @@ class WebhooksController < ApplicationController
         p email = assign_to.slice(assign_to.rindex(" ")+1,assign_to.length)
         p "======================== email ==================================="
       end  
-      client_id = '1000.RMODJ3TXVWLVGROZQR2CYKWAQQL4RK'
-      client_secret = '7241a1ead9a8513ebea78500298e54fb2db44cee9d'
+      client_id = '1000.AX7K22BZK6OS35PYCBPO990IEX8ZPC'
+      client_secret = '69f04bf294dee8d3a69c77367163af960c83814985'
       token_url = "https://accounts.zoho.in/oauth/v2/token"
       response = HTTParty.post(token_url, body: {
         refresh_token: refresh_token,
@@ -50,6 +50,7 @@ class WebhooksController < ApplicationController
         p "========================= access token ========================================"
         p access_token = response.parsed_response['access_token']
         p "========================= access token ========================================"
+        p "============================== thread response ===================================="
         p threads_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
         p "============================== thread response ===================================="
         contents = []
@@ -68,19 +69,6 @@ class WebhooksController < ApplicationController
                     else
                       mail.parts.first.decoded
                     end
-              mail.parts.each do |part|
-                if part.mime_type.start_with?('image/') && part.cid.present?
-                  filename = part.filename || "image_#{part.cid}.#{part.mime_type.split('/').last}"
-                  File.open(Rails.root.join('public', 'uploads', filename), 'wb') do |file|
-                  file.write(part.decoded)
-                  end
-                  if mail.html_part
-                  cid_reference = "cid:#{part.cid}"
-                  saved_file_path = "/uploads/#{filename}"
-                  mail.html_part.body = mail.html_part.body.decoded.gsub(cid_reference, saved_file_path)
-                  end
-                end
-              end
           else
             content_parsed = mail.body.decoded
           end

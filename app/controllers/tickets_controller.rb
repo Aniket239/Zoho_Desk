@@ -1,7 +1,7 @@
 class TicketsController < ApplicationController
     def refresh_access_token
-    client_id = '1000.RMODJ3TXVWLVGROZQR2CYKWAQQL4RK'
-    client_secret = '7241a1ead9a8513ebea78500298e54fb2db44cee9d'
+    client_id = '1000.AX7K22BZK6OS35PYCBPO990IEX8ZPC'
+    client_secret = '69f04bf294dee8d3a69c77367163af960c83814985'
     refresh_token = cookies[:refresh_token]
     token_url = "https://accounts.zoho.in/oauth/v2/token"
 
