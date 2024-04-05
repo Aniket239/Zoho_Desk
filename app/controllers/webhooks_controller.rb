@@ -18,16 +18,20 @@ class WebhooksController < ApplicationController
     def process_ticket_update(event)
       refresh_token='1000.4ba1d6b204ab1c7ecc7d90428b9eda3e.5e14e172761ec699949d20447711e9db'
       p "Processing Ticket Update Event"
-      payload = event['payload'] || {}
+      p "============================================= payload ========================================="
+      p payload = event['payload'] || {}
+      p "============================================= payload ========================================="
       ticket_number = payload['ticketNumber']
       ticket_id = payload['id']
       ticket_status = payload['status']
       subject = payload['subject']
       assign_to = payload.dig('customFields', 'Assign To')
+      author = payload.dig('assignee', 'firstName').to_s + ' ' + payload.dig('assignee', 'lastName').to_s
       p "Ticket Number: #{ticket_number}"
       p "Ticket ID: #{ticket_id}"
       p "Ticket Status: #{ticket_status}"
       p "Subject: #{subject}"
+      p "Author: #{author}"
 
       if assign_to!= nil
         p "Assigned To: #{assign_to}"
@@ -47,12 +51,8 @@ class WebhooksController < ApplicationController
       })
 
       if response.code == 200
-        p "========================= access token ========================================"
-        p access_token = response.parsed_response['access_token']
-        p "========================= access token ========================================"
-        p "============================== thread response ===================================="
-        p threads_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-        p "============================== thread response ===================================="
+        access_token = response.parsed_response['access_token']
+        threads_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
         contents = []
         threads_response["data"].each do |thread|
           thread_id = thread["id"]
@@ -74,7 +74,7 @@ class WebhooksController < ApplicationController
           end
           contents << content_parsed
         end
-        UserMailer.testEmail(contents[0],subject,email).deliver_now
+        UserMailer.testEmail(contents[0],subject,email,author).deliver_now
       else
         p "Failed to refresh token"
       end
