@@ -101,6 +101,11 @@ GEM
     nokogiri (1.13.10)
       mini_portile2 (~> 2.8.0)
       racc (~> 1.4)
+    postmark (1.25.0)
+      json
+    postmark-rails (0.20.0)
+      actionmailer (>= 3.0.0)
+      postmark (~> 1.15)
     racc (1.7.3)
     rack (1.6.13)
     rack-test (0.6.3)
@@ -193,6 +198,7 @@ DEPENDENCIES
   jbuilder (~> 2.0)
   jquery-rails
   mail
+  postmark-rails (~> 0.20.0)
   rails (= 4.2.8)
   rest-client
   sass-rails (~> 5.0)

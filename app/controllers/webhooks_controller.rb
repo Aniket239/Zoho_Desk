@@ -23,7 +23,7 @@ class WebhooksController < ApplicationController
       ticket_status = payload['status']
       subject = payload['subject']
       assign_to = payload.dig('customFields', 'Assign To')
-      author = payload.dig('assignee', 'firstName').to_s + ' ' + payload.dig('assignee', 'lastName').to_s
+      author = "Mail From"+ ' '+ payload.dig('assignee', 'firstName').to_s + ' ' + payload.dig('assignee', 'lastName').to_s
       p "Ticket Number: #{ticket_number}"
       p "Ticket ID: #{ticket_id}"
       p "Ticket Status: #{ticket_status}"
@@ -34,7 +34,7 @@ class WebhooksController < ApplicationController
         p "Assigned To: #{assign_to}"
         # assignd_by = "Sent By Rimi"
         p "======================== email ==================================="
-        p email = assign_to.slice(assign_to.rindex(" ")+1,assign_to.length)
+        p recipient_email = assign_to.slice(assign_to.rindex(" ")+1,assign_to.length)
         p "======================== email ==================================="
       end  
       client_id = '1000.AX7K22BZK6OS35PYCBPO990IEX8ZPC'
@@ -71,7 +71,7 @@ class WebhooksController < ApplicationController
           end
           contents << content_parsed
         end
-          UserMailer.testEmail(contents[0],subject,email,author).deliver_now if email 
+          UserMailer.testEmail(contents[0],subject,recipient_email,author).deliver_now if recipient_email 
       else
         p "Failed to refresh token"
       end
