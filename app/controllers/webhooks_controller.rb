@@ -74,7 +74,7 @@ class WebhooksController < ApplicationController
           end
           contents << content_parsed
         end
-        UserMailer.testEmail(contents[0],subject,email,author).deliver_now
+          UserMailer.testEmail(contents[0],subject,email,author).deliver_now if email 
       else
         p "Failed to refresh token"
       end
