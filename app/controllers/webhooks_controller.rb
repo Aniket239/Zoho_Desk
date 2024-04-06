@@ -14,7 +14,6 @@ class WebhooksController < ApplicationController
     end
   
     private
-  
     def process_ticket_update(event)
       refresh_token='1000.4ba1d6b204ab1c7ecc7d90428b9eda3e.5e14e172761ec699949d20447711e9db'
       payload = event['payload'] || {}
@@ -24,14 +23,8 @@ class WebhooksController < ApplicationController
       subject = payload['subject']
       assign_to = payload.dig('customFields', 'Assign To')
       author = "Mail From"+ ' '+ payload.dig('assignee', 'firstName').to_s + ' ' + payload.dig('assignee', 'lastName').to_s
-      p "Ticket Number: #{ticket_number}"
-      p "Ticket ID: #{ticket_id}"
-      p "Ticket Status: #{ticket_status}"
-      p "Subject: #{subject}"
-      p "Author: #{author}"
 
       if assign_to!= nil
-        p "Assigned To: #{assign_to}"
         p "======================== email ==================================="
         p recipient_email = assign_to.slice(assign_to.rindex(" ")+1,assign_to.length)
         p "======================== email ==================================="

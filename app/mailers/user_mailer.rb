@@ -1,4 +1,6 @@
 class UserMailer < ApplicationMailer
+  default from: "zohodesk.thejaingroup@gmail.com"
+  layout 'mailer'
     def testEmail(content_mail, subject,recipient_email,author)
       @content = content_mail
       @author = author

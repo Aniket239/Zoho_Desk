@@ -16,8 +16,8 @@ Rails.application.configure do
     address: 'smtp.gmail.com',
     port: 587,
     domain: 'gmail.com',
-    user_name: 'aniketbiswas2392001@gmail.com',
-    password: 'zbys xspe qvqy uipq',
+    user_name: 'zohodesk.thejaingroup@gmail.com',
+    password: 'qiyv ymjj pkdg dhls',
     authentication: 'plain',
     enable_starttls_auto: true
   }
