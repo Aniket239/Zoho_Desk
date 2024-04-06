@@ -32,7 +32,6 @@ class WebhooksController < ApplicationController
 
       if assign_to!= nil
         p "Assigned To: #{assign_to}"
-        # assignd_by = "Sent By Rimi"
         p "======================== email ==================================="
         p recipient_email = assign_to.slice(assign_to.rindex(" ")+1,assign_to.length)
         p "======================== email ==================================="
