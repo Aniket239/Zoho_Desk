@@ -25,9 +25,7 @@ class WebhooksController < ApplicationController
       author = "Mail From"+ ' '+ payload.dig('assignee', 'firstName').to_s + ' ' + payload.dig('assignee', 'lastName').to_s
 
       if assign_to!= nil
-        p "======================== email ==================================="
-        p recipient_email = assign_to.slice(assign_to.rindex(" ")+1,assign_to.length)
-        p "======================== email ==================================="
+        recipient_email = assign_to.slice(assign_to.rindex(" ")+1,assign_to.length)
       end  
       client_id = '1000.AX7K22BZK6OS35PYCBPO990IEX8ZPC'
       client_secret = '69f04bf294dee8d3a69c77367163af960c83814985'
