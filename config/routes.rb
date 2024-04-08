@@ -22,5 +22,7 @@ Rails.application.routes.draw do
   get 'tickets/emailTest'
   post 'tickets/emailTest'
   get 'tickets/emailTest', to: 'tickets#emailTest'
+  get 'tickets/reports'
+  post 'tickets/reports'
 
 end

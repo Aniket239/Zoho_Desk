@@ -82,4 +82,8 @@ class TicketsController < ApplicationController
       p response.code
     end
   end
+
+  def reports
+  
+  end   
 end

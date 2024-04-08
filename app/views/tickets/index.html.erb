@@ -2,10 +2,10 @@
 .tickets {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     width: 100%;
-    margin:7% 0;
+    margin:7.5% 0;
 }
 
-.tickets h2 {
+.tickets h3 {
     color: #333;
     text-align: left;
     margin-bottom: 20px;
@@ -54,8 +54,6 @@
 .tickets a{
     text-decoration: none;
 }
-
-
 </style>
 
 <div class="tickets">
@@ -65,14 +63,20 @@
             <% ticket_count += 1%>
         <% end %>
     <% end %>
-    <h2>All Tickets(<%= ticket_count%>)</h2>
+    <select name="Tickets" id="Tickets">
+        <option value="All Tickets"><h3>All Tickets(<%= ticket_count%>)</h3></option>
+        <option value="Open Tickets"><h3>Open Tickets</h3></option>
+        <option value="Closed Tickets"><h3>Closed Tickets</h3></option>
+        <option value="On Hold"><h3>On Hold</h3></option>
+        <option value="All Tickets"><h3>All Tickets</h3></option>
+    </select>
     <% if @tickets.present? && @tickets["data"].present? %>
         <% @tickets["data"].each do |ticket| %>
         <%= link_to tickets_threads_path(ticket) do %>
         <div class="ticket">
             <div class="info">
                 <div>
-                    <%= ticket["lastThread"]["direction"]%>
+                    <p id="direction"><%= ticket["lastThread"]["direction"]%></p>
                 </div>
                 <div>
                     <p><%= ticket["subject"] %></p>
@@ -97,5 +101,14 @@
 </div>
 
 <script>
-    
+    function direction(){
+    var directionElement = document.getElementById('direction');
+    console.log(directionElement);
+    if (directionElement) {
+        var directionValue = directionElement.innerText; // or .innerText
+        console.log('Direction value:', directionValue);
+    } else {
+        console.log('Direction element not found');
+    }
+    }
 </script>
