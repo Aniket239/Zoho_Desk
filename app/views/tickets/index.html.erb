@@ -76,7 +76,11 @@
         <div class="ticket">
             <div class="info">
                 <div>
-                    <p id="direction"><%= ticket["lastThread"]["direction"]%></p>
+                    <% if ticket["lastThread"]["direction"]=="in"%>
+                        <p>inward</p>
+                    <% elsif ticket["lastThread"]["direction"]=="out"%>
+                        <p>outward</p>
+                    <% end %>
                 </div>
                 <div>
                     <p><%= ticket["subject"] %></p>
@@ -99,16 +103,3 @@
     <p>No tickets found.</p>
 <% end %>
 </div>
-
-<script>
-    function direction(){
-    var directionElement = document.getElementById('direction');
-    console.log(directionElement);
-    if (directionElement) {
-        var directionValue = directionElement.innerText; // or .innerText
-        console.log('Direction value:', directionValue);
-    } else {
-        console.log('Direction element not found');
-    }
-    }
-</script>

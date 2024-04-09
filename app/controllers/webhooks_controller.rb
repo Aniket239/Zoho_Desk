@@ -24,8 +24,10 @@ class WebhooksController < ApplicationController
       ticket_status = payload['status']
       subject = payload['subject']
       assign_to = payload.dig('customFields', 'Assign To')
-      author = "Mail From"+ ' '+ payload.dig('assignee', 'firstName').to_s + ' ' + payload.dig('assignee', 'lastName').to_s
-
+      note = payload.dig('customFields', 'Note')
+      p "================================================ author ========================================= "
+      p agent_name = "Mail From"+ ' '+ payload.dig('assignee', 'firstName').to_s + ' ' + payload.dig('assignee', 'lastName').to_s
+      p "================================================ author ========================================= "
       if assign_to!= nil
         recipient_email = assign_to.slice(assign_to.rindex(" ")+1,assign_to.length)
       end  
@@ -63,7 +65,7 @@ class WebhooksController < ApplicationController
           end
           contents << content_parsed
         end
-          UserMailer.testEmail(contents[0],subject,recipient_email,author).deliver_now if recipient_email 
+          UserMailer.zohoMail(contents[0],subject,recipient_email,agent_name,note).deliver_now if recipient_email 
       else
         p "Failed to refresh token"
       end
