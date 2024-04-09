@@ -7,7 +7,7 @@ class WebhooksController < ApplicationController
       if request_data.dig('_json', 0, 'eventType') == 'Ticket_Update'
         ticket_update_event = request_data.dig('_json', 0)
         process_ticket_update(ticket_update_event)
-      else
+    else
         p "Received a non-ticket update event"
       end
       head :ok
@@ -25,6 +25,7 @@ class WebhooksController < ApplicationController
       subject = payload['subject']
       assign_to = payload.dig('customFields', 'Assign To')
       note = payload.dig('customFields', 'Note')
+      assignee_email = payload.dig('assignee', 'email')
       p "================================================ author ========================================= "
       p agent_name = "Mail From"+ ' '+ payload.dig('assignee', 'firstName').to_s + ' ' + payload.dig('assignee', 'lastName').to_s
       p "================================================ author ========================================= "
@@ -65,7 +66,7 @@ class WebhooksController < ApplicationController
           end
           contents << content_parsed
         end
-          UserMailer.zohoMail(contents[0],subject,recipient_email,agent_name,note).deliver_now if recipient_email 
+          UserMailer.zohoMail(contents[0],subject,recipient_email,agent_name,note,assignee_email).deliver_now if recipient_email 
       else
         p "Failed to refresh token"
       end
