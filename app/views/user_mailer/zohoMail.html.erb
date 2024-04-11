@@ -1,5 +1,7 @@
 <h3><%= @agent_name %></h3>
-<% if @note%>
-<h4>Note: <%= @note %></h4><hr><br>
+<% if @note!=nil%>
+    <h4>Note: <%= @note %></h4><hr><br>
+<% else %>
+    <hr><br>
 <% end %>
 <%= render html: @content.html_safe%>

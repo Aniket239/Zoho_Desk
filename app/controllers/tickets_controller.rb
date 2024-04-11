@@ -34,7 +34,6 @@ class TicketsController < ApplicationController
         tickets_data["data"] = sorted_tickets
       end
       @tickets = tickets_data 
-      p @tickets
     else
       refresh_access_token
       redirect_to tickets_index_path
@@ -51,8 +50,6 @@ class TicketsController < ApplicationController
     if @ticket["erroCode"]=="INVALID_OAUTH" || @threads["errorCode"] == "INVALID_OAUTH"
       refresh_access_token
     end
-    p @ticket
-    p @threads
   end
 
   def reply
