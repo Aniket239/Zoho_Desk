@@ -7,9 +7,7 @@ class WebhooksController < ApplicationController
       if request_data.dig('_json', 0, 'eventType') == 'Ticket_Update'
         ticket_update_event = request_data.dig('_json', 0)
         refresh_token='1000.4ba1d6b204ab1c7ecc7d90428b9eda3e.5e14e172761ec699949d20447711e9db'
-        p "============================== payload =========================================="
-        p payload = ticket_update_event['payload'] || {}
-        p "============================== payload =========================================="
+        payload = ticket_update_event['payload'] || {}
         ticket_number = payload['ticketNumber']
         ticket_id = payload['id']
         ticket_status = payload['status']
@@ -18,9 +16,7 @@ class WebhooksController < ApplicationController
         note = payload.dig('customFields', 'Note To Assignee')
         assigneer_email = payload.dig('assignee', 'email')
         cc=payload.dig('customFields', 'CC Rishi Jain')
-        p "================================================ author ========================================= "
-        p agent_name = "Mail From"+ ' '+ payload.dig('assignee', 'firstName').to_s + ' ' + payload.dig('assignee', 'lastName').to_s
-        p "================================================ author ========================================= "
+        agent_name = "Mail From"+ ' '+ payload.dig('assignee', 'firstName').to_s + ' ' + payload.dig('assignee', 'lastName').to_s
         if assign_to!= nil
           recipient_email = assign_to.slice(assign_to.rindex(" ")+1,assign_to.length)
         end  
@@ -73,9 +69,7 @@ class WebhooksController < ApplicationController
       if request_data.dig('_json', 0, 'eventType') == 'Ticket_Update'
         ticket_update_event = request_data.dig('_json', 0)
         refresh_token='1000.4ba1d6b204ab1c7ecc7d90428b9eda3e.5e14e172761ec699949d20447711e9db'
-        p "============================== payload =========================================="
-        p payload = ticket_update_event['payload'] || {}
-        p "============================== payload =========================================="
+        payload = ticket_update_event['payload'] || {}
         ticket_number = payload['ticketNumber']
         ticket_id = payload['id']
         ticket_status = payload['status']
