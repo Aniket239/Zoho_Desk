@@ -26,15 +26,18 @@ scheduler.every '1m' do
         agents["data"].each do |agent|
             agent_id<<agent["id"]
         end    
-        p "================================"
-        p agent_id
-        p "================================"
-        tickets=[[]]
+        tickets={}
         agent_id.each do |id|
+            ticket_id=[]
             tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-            p "============================================== agent #{id} ============================================"
-            p tickets_response
-            p "============================================== agent #{id} ============================================"
+            ticket_response["data"].each do |ticket|
+                if ticket["status"] != "Non Customer"
+                    ticket_id<<ticket_response["data"]["id"]
+                end
+            end
+            p "==================================================== ticketid ======================================="
+            p ticket_id
+            p "==================================================== ticketid ======================================="     
         end    
     else
         p "error while getting access token"
