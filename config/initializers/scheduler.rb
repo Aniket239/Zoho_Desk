@@ -3,10 +3,10 @@ require 'rufus-scheduler'
 scheduler = Rufus::Scheduler.new
 
 scheduler.every '1m' do
-    allAgents
+    ticketClosedAfter72Hours
   end
 
-  def allAgents
+  def ticketClosedAfter72Hours
     client_id = '1000.AX7K22BZK6OS35PYCBPO990IEX8ZPC'
     client_secret = '69f04bf294dee8d3a69c77367163af960c83814985'
     token_url = "https://accounts.zoho.in/oauth/v2/token"
@@ -17,28 +17,33 @@ scheduler.every '1m' do
       client_secret: client_secret,
       grant_type: 'refresh_token'
     })
-    p access_token_response
+    access_token_response
     if access_token_response.code == 200
-        p access_token = access_token_response.parsed_response['access_token']
+        access_token = access_token_response.parsed_response['access_token']
         agents_response = HTTParty.get("https://desk.zoho.in/api/v1/agents", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-        p agents = agents_response.parsed_response
+        agents = agents_response.parsed_response
         agent_id=[]
         agents["data"].each do |agent|
             agent_id<<agent["id"]
         end    
         tickets={}
+        ticket_id=[]
         agent_id.each do |id|
-            ticket_id=[]
-            tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-            ticket_response["data"].each do |ticket|
-                if ticket["status"] != "Non Customer"
-                    ticket_id<<ticket_response["data"]["id"]
+            tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=Closed", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+            p "============================= tickets ===================================="
+            p tickets_response
+            p "============================= tickets ===================================="
+            tickets_response["data"].each do |ticket|
+                if ticket["status"] == "Closed"
+                    if (((DateTime.parse(ticket["closedTime"]) - DateTime.parse(ticket["createdTime"]))* 24).to_f) > 72
+                        ticket_id<<ticket["ticketNumber"]
+                    end
                 end
             end
-            p "==================================================== ticketid ======================================="
-            p ticket_id
-            p "==================================================== ticketid ======================================="     
-        end    
+        end
+        p "========================================================= tickets closed after 72 hours=========================="
+        p ticket_id
+        p "========================================================= tickets closed after 72 hours=========================="    
     else
         p "error while getting access token"
     end
