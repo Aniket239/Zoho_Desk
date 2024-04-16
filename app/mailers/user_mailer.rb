@@ -11,9 +11,6 @@ class UserMailer < ApplicationMailer
         cc_mail=  nil
       end
       mail(to: recipient_email, subject: subject, cc: [cc_mail,assigneer_email], bcc: "system4@thejaingroup.com")
-    end
-
-    def time_for_closure
-      
+    end      
   end
 

@@ -79,10 +79,5 @@ class TicketsController < ApplicationController
       p "error"
       p response.code
     end
-  end
-
-  def closure
-
-  
   end   
 end
