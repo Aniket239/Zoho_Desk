@@ -29,7 +29,7 @@ scheduler.every '1m' do
         tickets={}
         ticket_id=[]
         agent_id.each do |id|
-            tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=Closed", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+            tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=Closed&limit=100", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
             p "============================= tickets ===================================="
             p tickets_response
             p "============================= tickets ===================================="
@@ -43,6 +43,7 @@ scheduler.every '1m' do
         end
         p "========================================================= tickets closed after 72 hours=========================="
         p ticket_id
+        p ticket_id.count
         p "========================================================= tickets closed after 72 hours=========================="    
     else
         p "error while getting access token"
