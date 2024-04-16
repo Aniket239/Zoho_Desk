@@ -16,8 +16,7 @@ gem 'coffee-rails', '~> 4.1.0'
 
 gem 'execjs'
 gem 'mail'
-gem 'postmark-rails', "~> 0.20.0"
-
+gem 'rufus-scheduler'
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
 # Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks

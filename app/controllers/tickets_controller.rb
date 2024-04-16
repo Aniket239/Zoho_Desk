@@ -33,7 +33,8 @@ class TicketsController < ApplicationController
         sorted_tickets = tickets_data["data"].sort_by { |ticket| -ticket["ticketNumber"].to_i }
         tickets_data["data"] = sorted_tickets
       end
-      @tickets = tickets_data 
+      @tickets = tickets_data
+      p @tickets 
     else
       refresh_access_token
       redirect_to tickets_index_path
@@ -80,7 +81,8 @@ class TicketsController < ApplicationController
     end
   end
 
-  def reports
+  def closure
+
   
   end   
 end
