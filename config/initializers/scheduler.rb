@@ -40,11 +40,11 @@ scheduler.every '1m' do
                     end
                 end
             end
-        end
-        p "========================================================= tickets closed after 72 hours=========================="
-        p ticket_id
-        p ticket_id.count
-        p "========================================================= tickets closed after 72 hours=========================="    
+            p "========================================================= tickets closed by #{id} after 72 hours=========================="
+            p ticket_id
+            p ticket_id.count
+            p "========================================================= tickets closed by #{id} after 72 hours=========================="
+        end    
     else
         p "error while getting access token"
     end

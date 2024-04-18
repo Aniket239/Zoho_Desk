@@ -63,39 +63,4 @@ class WebhooksController < ApplicationController
       end
       head :ok
     end
-
-    def status
-      request_data = params
-      if request_data.dig('_json', 0, 'eventType') == 'Ticket_Update'
-        ticket_update_event = request_data.dig('_json', 0)
-        refresh_token='1000.4ba1d6b204ab1c7ecc7d90428b9eda3e.5e14e172761ec699949d20447711e9db'
-        payload = ticket_update_event['payload'] || {}
-        ticket_number = payload['ticketNumber']
-        ticket_id = payload['id']
-        ticket_status = payload['status']
-        if ticket_status=="Non Customer"
-
-        else 
-        end  
-        subject = payload['subject'] 
-        client_id = '1000.AX7K22BZK6OS35PYCBPO990IEX8ZPC'
-        client_secret = '69f04bf294dee8d3a69c77367163af960c83814985'
-        token_url = "https://accounts.zoho.in/oauth/v2/token"
-        response = HTTParty.post(token_url, body: {
-          refresh_token: refresh_token,
-          client_id: client_id,
-          client_secret: client_secret,
-          grant_type: 'refresh_token'
-        })
-  
-        if response.code == 200
-          access_token = response.parsed_response['access_token']
-        else
-          p "Failed to refresh token"
-        end
-      else
-        p "Received a non-ticket update event"
-      end
-      head :ok
-    end 
   end
