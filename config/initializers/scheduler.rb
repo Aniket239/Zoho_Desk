@@ -21,18 +21,30 @@ scheduler.every '1m' do
     if access_token_response.code == 200
         access_token = access_token_response.parsed_response['access_token']
         agents_response = HTTParty.get("https://desk.zoho.in/api/v1/agents", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-        agents = agents_response.parsed_response
+        p "============================== agents ==========================================="
+        p agents = agents_response.parsed_response
+        p "============================== agents ==========================================="
         agent_id=[]
+        agent_name=[]
         agents["data"].each do |agent|
             agent_id<<agent["id"]
+            agent_name<<agent["name"]
         end    
         tickets={}
-        ticket_id=[]
         agent_id.each do |id|
+            ticket_id=[]
+            if id == "142173000000064001"
+                name= "PALLABITA GHOSH"
+            elsif id == "142173000000191144"
+                name = "Rimi Kundu"
+            else
+                name = "Sarnali Haldar"
+            end
             tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=Closed&limit=100", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-            p "============================= tickets ===================================="
-            p tickets_response
-            p "============================= tickets ===================================="
+            ticket_count= HTTParty.get("https://desk.zoho.in/api/v1/ticketsCountByFieldValues?field=status", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+            # p "============================= tickets ===================================="
+            # p tickets_response
+            # p "============================= tickets ===================================="
             tickets_response["data"].each do |ticket|
                 if ticket["status"] == "Closed"
                     if (((DateTime.parse(ticket["closedTime"]) - DateTime.parse(ticket["createdTime"]))* 24).to_f) > 72
@@ -40,10 +52,11 @@ scheduler.every '1m' do
                     end
                 end
             end
-            p "========================================================= tickets closed by #{id} after 72 hours=========================="
+            p "========================================================= tickets closed by #{id} of #{name}after 72 hours=========================="
             p ticket_id
             p ticket_id.count
-            p "========================================================= tickets closed by #{id} after 72 hours=========================="
+            p ticket_count
+            p "========================================================= tickets closed by #{id} of #{name} after 72 hours=========================="
         end    
     else
         p "error while getting access token"
