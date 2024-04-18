@@ -40,11 +40,13 @@ scheduler.every '1m' do
             else
                 name = "Sarnali Haldar"
             end
+            ticket_count_response= HTTParty.get("https://desk.zoho.in/api/v1/ticketsCountByFieldValues?field=status&assigneeId=#{id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
             tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=Closed&limit=100", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-            ticket_count= HTTParty.get("https://desk.zoho.in/api/v1/ticketsCountByFieldValues?field=status", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
             # p "============================= tickets ===================================="
             # p tickets_response
             # p "============================= tickets ===================================="
+            closed_status = ticket_count_response["status"].find { |status| status["value"] == "closed" }
+            closed_count = closed_status ? closed_status["count"].to_i : 0    
             tickets_response["data"].each do |ticket|
                 if ticket["status"] == "Closed"
                     if (((DateTime.parse(ticket["closedTime"]) - DateTime.parse(ticket["createdTime"]))* 24).to_f) > 72
@@ -54,11 +56,12 @@ scheduler.every '1m' do
             end
             p "========================================================= tickets closed by #{id} of #{name}after 72 hours=========================="
             p ticket_id
-            p ticket_id.count
-            p ticket_count
+            p "Ticket id count #{ticket_id.count}"
+            p "closed ticket count: #{closed_count}"
             p "========================================================= tickets closed by #{id} of #{name} after 72 hours=========================="
         end    
     else
         p "error while getting access token"
     end
 end
+
