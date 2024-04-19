@@ -21,9 +21,7 @@ scheduler.every '1m' do
     if access_token_response.code == 200
         access_token = access_token_response.parsed_response['access_token']
         agents_response = HTTParty.get("https://desk.zoho.in/api/v1/agents", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-        p "============================== agents ==========================================="
-        p agents = agents_response.parsed_response
-        p "============================== agents ==========================================="
+        agents = agents_response.parsed_response
         agent_id=[]
         agent_name=[]
         agents["data"].each do |agent|
@@ -41,27 +39,63 @@ scheduler.every '1m' do
                 name = "Sarnali Haldar"
             end
             ticket_count_response= HTTParty.get("https://desk.zoho.in/api/v1/ticketsCountByFieldValues?field=status&assigneeId=#{id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-            tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=Closed&limit=100", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-            # p "============================= tickets ===================================="
-            # p tickets_response
-            # p "============================= tickets ===================================="
             closed_status = ticket_count_response["status"].find { |status| status["value"] == "closed" }
-            closed_count = closed_status ? closed_status["count"].to_i : 0    
-            tickets_response["data"].each do |ticket|
-                if ticket["status"] == "Closed"
-                    if (((DateTime.parse(ticket["closedTime"]) - DateTime.parse(ticket["createdTime"]))* 24).to_f) > 72
-                        ticket_id<<ticket["ticketNumber"]
+            closed_count = closed_status ? closed_status["count"].to_i : 0
+            if closed_count>100
+                loop_count = closed_count/100.0
+                loop_count_int = loop_count.to_i
+                if loop_count>loop_count_int
+                    loop_count_int = loop_count_int+1
+                end
+            else
+                loop_count_int = 1
+            end
+            all_closed_tickets=[]
+            if loop_count_int==1
+                tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=Closed&from=0&limit=100", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+                all_closed_tickets<<tickets_response
+            elsif loop_count_int>1
+                (1..loop_count_int).each do |i|
+                    if i==1
+                        tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=Closed&from=0&limit=99", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+                        all_closed_tickets<<tickets_response
+                    else
+                        tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=Closed&from=#{(i-1)*100}&limit=99", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+                        all_closed_tickets<<tickets_response 
+                    end
+                end 
+            end
+            if all_closed_tickets.count==1
+                tickets_response["data"].each do |ticket|
+                    if ticket["status"] == "Closed"
+                        if (((DateTime.parse(ticket["closedTime"]) - DateTime.parse(ticket["createdTime"]))* 24).to_f) > 72
+                            ticket_id<<ticket["ticketNumber"].to_i
+                        end
+                    end
+                end
+            else
+                all_closed_tickets.each do |tickets|
+                    tickets["data"].each do |ticket|
+                        if ticket["status"] == "Closed"
+                            if (((DateTime.parse(ticket["closedTime"]) - DateTime.parse(ticket["createdTime"]))* 24).to_f) > 72
+                                ticket_id<<ticket["ticketNumber"].to_i
+                            end
+                        end
                     end
                 end
             end
-            p "========================================================= tickets closed by #{id} of #{name}after 72 hours=========================="
-            p ticket_id
-            p "Ticket id count #{ticket_id.count}"
+            p "========================================================= tickets closed by #{id} of #{name}after 72 hours =========================="
+            p ticket_id.sort
+            p "Ticket id count of tickets  closed after 72 hr: #{ticket_id.count}"
             p "closed ticket count: #{closed_count}"
-            p "========================================================= tickets closed by #{id} of #{name} after 72 hours=========================="
+            p "========================================================= tickets closed by #{id} of #{name} after 72 hours =========================="
         end    
     else
         p "error while getting access token"
     end
 end
+
+ticketClosedAfter72Hours
+
+scheduler.join
 
