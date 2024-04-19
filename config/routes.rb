@@ -3,7 +3,6 @@ Rails.application.routes.draw do
   get '/auth/callback', to: 'auth#callback'
 
   post '/webhook/assignTo', to: 'webhooks#assignTo'
-  post '/webhook/status', to: 'webhooks#status'
 
   root 'tickets#login'
   post 'tickets/login'
