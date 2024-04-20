@@ -1,10 +1,20 @@
 require 'rufus-scheduler'
 require 'mail'
+require 'date'
+require 'httparty'
 
 scheduler = Rufus::Scheduler.new
 
     scheduler.every '1m' do
-        ticketClosedAfter72Hours
+        begin
+            ticketClosedAfter72Hours
+        rescue Net::OpenTimeout => e
+            puts "Encountered a timeout, will retry: #{e.message}"
+            sleep 10 # wait 10 seconds before retrying
+        retry
+        rescue => e
+            puts "Failed to execute job: #{e.message}"
+        end
     end
 
     def weekly_report_72hr(tickets)
@@ -72,22 +82,32 @@ scheduler = Rufus::Scheduler.new
                 end
                 if all_closed_tickets.count==1
                     tickets_response["data"].each do |ticket|
-                        p "================================== tickets =============================="
-                        p ticket
-                        p "================================== tickets =============================="
                         close_time=Date.parse(ticket["closedTime"])
-                        if ticket["status"] == "Closed"
+                        today = Date.today
+                        beginning_of_this_week = today.beginning_of_week
+                        beginning_of_last_week = (today - 1.week).beginning_of_week
+                        if ticket["status"] == "Closed" && close_time >= beginning_of_last_week && close_time < beginning_of_this_week
                             if (((DateTime.parse(ticket["closedTime"]) - DateTime.parse(ticket["createdTime"]))* 24).to_f) > 72
                                 ticket_id<<ticket["ticketNumber"].to_i
+                                p "================================== close time ======================="
+                                p close_time
+                                p "================================== close time ======================="
                             end
                         end
                     end
                 else
                     all_closed_tickets.each do |tickets|
                         tickets["data"].each do |ticket|
-                            if ticket["status"] == "Closed"
+                            close_time=Date.parse(ticket["closedTime"])
+                            today = Date.today
+                            beginning_of_this_week = today.beginning_of_week
+                            beginning_of_last_week = (today - 1.week).beginning_of_week
+                            if ticket["status"] == "Closed" && close_time >= beginning_of_last_week && close_time < beginning_of_this_week
                                 if (((DateTime.parse(ticket["closedTime"]) - DateTime.parse(ticket["createdTime"]))* 24).to_f) > 72
                                     ticket_id<<ticket["ticketNumber"].to_i
+                                    p "================================== close time ======================="
+                                    p close_time
+                                    p "================================== close time ======================="
                                 end
                             end
                         end
