@@ -15,12 +15,7 @@ class UserMailer < ApplicationMailer
     
     def weekly_report(tickets)
       @tickets = tickets
-      mail = mail(to: "system4@thejaingroup.com", subject: "Weekly Report")
-      p "Attempting to send email to system4@thejaingroup.com"
-      mail.deliver
-      p "Email sent successfully"
-    rescue StandardError => e
-      p "Failed to send email: #{e.message}"
+      mail(to: "system4@thejaingroup.com", subject: "Weekly Report")
     end
     # , cc: [cc_mail,assigneer_email], bcc: "system4@thejaingroup.com"
   end

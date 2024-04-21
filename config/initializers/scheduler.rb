@@ -5,7 +5,7 @@ require 'httparty'
 
 scheduler = Rufus::Scheduler.new
 
-    scheduler.every '1m' do
+    scheduler.every '5m' do
         begin
             ticketClosedAfter72Hours
         rescue Net::OpenTimeout => e
@@ -17,11 +17,7 @@ scheduler = Rufus::Scheduler.new
         end
     end
 
-    def weekly_report_72hr(tickets)
-        UserMailer.weekly_report(tickets).deliver_now
-    end
-
-    def ticketClosedAfter72Hours
+    def access_token
         client_id = '1000.AX7K22BZK6OS35PYCBPO990IEX8ZPC'
         client_secret = '69f04bf294dee8d3a69c77367163af960c83814985'
         token_url = "https://accounts.zoho.in/oauth/v2/token"
@@ -32,7 +28,15 @@ scheduler = Rufus::Scheduler.new
         client_secret: client_secret,
         grant_type: 'refresh_token'
         })
-        access_token_response
+        return access_token_response
+    end
+
+    def weekly_report_72hr(tickets)
+        UserMailer.weekly_report(tickets).deliver_now
+    end
+
+    def ticketClosedAfter72Hours
+        access_token_response = access_token
         if access_token_response.code == 200
             access_token = access_token_response.parsed_response['access_token']
             agents_response = HTTParty.get("https://desk.zoho.in/api/v1/agents", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
@@ -67,21 +71,21 @@ scheduler = Rufus::Scheduler.new
                 end
                 all_closed_tickets=[]
                 if loop_count_int==1
-                    tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=Closed&from=0&limit=100", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-                    all_closed_tickets<<tickets_response
+                    closed_tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=Closed&from=0&limit=100", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+                    all_closed_tickets<<closed_tickets_response
                 elsif loop_count_int>1
                     (1..loop_count_int).each do |i|
                         if i==1
-                            tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=Closed&from=0&limit=99", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-                            all_closed_tickets<<tickets_response
+                            closed_tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=Closed&from=0&limit=99", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+                            all_closed_tickets<<closed_tickets_response
                         else
-                            tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=Closed&from=#{(i-1)*100}&limit=99", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-                            all_closed_tickets<<tickets_response 
+                            closed_tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=Closed&from=#{(i-1)*100}&limit=99", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+                            all_closed_tickets<<closed_tickets_response 
                         end
                     end 
                 end
                 if all_closed_tickets.count==1
-                    tickets_response["data"].each do |ticket|
+                    closed_tickets_response["data"].each do |ticket|
                         close_time=Date.parse(ticket["closedTime"])
                         today = Date.today
                         beginning_of_this_week = today.beginning_of_week
@@ -121,11 +125,18 @@ scheduler = Rufus::Scheduler.new
                 p "========================================================= tickets closed by #{id} of #{name} after 72 hours =========================="
             end
             p tickets
+            p Time.now
             weekly_report_72hr(tickets)
         else
             p "error while getting access token"
         end
     end
+
+    def ticketsOpenForMoreThan72hrs
+        access_token_response = access_token
+
+    end   
+scheduler.join
 
 
 
