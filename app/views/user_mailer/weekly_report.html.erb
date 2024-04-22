@@ -1,4 +1,74 @@
-<h2>Number Of Tickets Closed After 72 Hours of Creation</h2>
-<p>Pallabita Ghosh - <%= @tickets["PALLABITA GHOSH"] %></p>
-<p>Rimi Kundu - <%= @tickets["Rimi Kundu"] %></p>
-<p>Sarnali Haldar - <%= @tickets["Sarnali Haldar"] %></p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .ticket-list {
+            margin-top: 10px;
+        }
+
+        .ticket-item {
+            margin-bottom: 5px;
+        }
+
+        .ticket-name {
+            font-weight: bold;
+        }
+
+        .ticket-percentage {
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3>Report</h3>
+        <h3>Date: <%= Date.today%></h3>
+        <p>Number of Tickets closed after 72 Hours of creation</p>
+        <% last_week_start = Date.today.beginning_of_week - 7.days %>
+        <% last_week_end = Date.today.beginning_of_week - 1.day %>
+        <p>From <%= last_week_start.strftime('%d/%m/%Y') %> to <%= last_week_end.strftime('%d/%m/%Y') %></p>
+        <div class="ticket-list">
+            <div class="ticket-item">
+                <span class="ticket-name">Pallabita Ghosh</span> - <%= @tickets["PALLABITA GHOSH"] %>%
+            </div>
+            <div class="ticket-item">
+                <span class="ticket-name">Rimi Kundu</span> - <%= @tickets["Rimi Kundu"] %>%
+            </div>
+            <div class="ticket-item">
+                <span class="ticket-name">Sarnali Haldar</span> - <%= @tickets["Sarnali Haldar"] %>%
+            </div>
+        </div>
+    </div>
+</body>
+</html>
