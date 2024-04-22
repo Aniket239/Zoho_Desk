@@ -37,8 +37,7 @@ class WebhooksController < ApplicationController
           threads_response["data"].each do |thread|
             thread_id = thread["id"]
             content_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads/#{thread_id}/originalContent", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-            ticket_id = content_response.parsed_response["id"]
-            customer_email = content_response.parsed_response["contact"]["email"]
+            # customer_email = content_response.parsed_response["contact"]["email"]
             content = content_response.parsed_response["content"]
             mail = Mail.read_from_string(content)
             if mail.multipart?
@@ -56,7 +55,7 @@ class WebhooksController < ApplicationController
             end
             contents << content_parsed
           end
-            UserMailer.zohoMail(contents[0],subject,recipient_email,agent_name,note,assigneer_email,cc,ticket_id,customer_email).deliver_now if recipient_email 
+            UserMailer.zohoMail(contents[0],subject,recipient_email,agent_name,note,assigneer_email,cc,ticket_id).deliver_now if recipient_email 
         else
           p "Failed to refresh token"
         end

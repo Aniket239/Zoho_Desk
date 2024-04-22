@@ -1,8 +1,18 @@
-<h3><%= @agent_name %></h3>
-<% if @note!=nil%>
-    <h4>Note: <%= @note %></h4><hr><br>
+<h3>
+    <%= @agent_name %>
+</h3>
+<% if @note.present? %>
+    <h4>Note: <%= @note %></h4>
+    <a href="https://0835-49-37-10-9.ngrok-free.app/tickets/threads?ticketId=<%= @ticket_id %>"
+       style="background-color: #007BFF; color: white; padding: 10px 20px; text-align: center; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; border: none;">
+        Update Ticket
+    </a>
+    <hr><br>
 <% else %>
+    <a href="https://0835-49-37-10-9.ngrok-free.app/tickets/threads?ticketId=<%= @ticket_id %>"
+       style="background-color: #007BFF; color: white; padding: 10px 20px; text-align: center; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; border: none;">
+        Update Ticket
+    </a>
     <hr><br>
 <% end %>
-<!-- <a href="https://0835-49-37-10-9.ngrok-free.app/" -->
-<%= render html: @content.html_safe%>
+<%= render html: @content.html_safe %>

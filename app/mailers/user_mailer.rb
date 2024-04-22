@@ -1,11 +1,11 @@
 class UserMailer < ApplicationMailer
   default from: "zohodesk.thejaingroup@gmail.com"
   layout 'mailer'
-    def zohoMail(content_mail, subject,recipient_email,agent_name,note,assigneer_email,cc,ticket_id,customer_email)
+    def zohoMail(content_mail, subject,recipient_email,agent_name,note,assigneer_email,cc,ticket_id)
       @content = content_mail
       @agent_name = agent_name
-      @ticket_id = ticket_id
-      @customer_email = customer_email
+      p @ticket_id = ticket_id
+      # @customer_email = customer_email
       @note = note
       if cc=="true"
         cc_mail=  "rishi@thejaingroup.com"
