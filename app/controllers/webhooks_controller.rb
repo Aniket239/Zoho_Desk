@@ -38,47 +38,62 @@ class WebhooksController < ApplicationController
             thread_id = thread["id"]
             content_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads/#{thread_id}/originalContent", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
             # customer_email = content_response.parsed_response["contact"]["email"]
-            # content = content_response.parsed_response["content"]
-            # mail = Mail.read_from_string(content)
-            # if mail.multipart?
-            #   html_part = mail.html_part
-            #   text_part = mail.text_part
-            #   content_parsed =  if html_part
-            #                       html_part.decoded
-            #                     elsif text_part
-            #                       text_part.decoded
-            #                     else
-            #                       mail.parts.first.decoded
-            #                     end
-            # else
-            #   content_parsed = mail.body.decoded
-            # end
-            contents << content_response
-          end
-          p "====================== contents =============================="
-          p contents
+            content = content_response.parsed_response["content"]
+            mail = Mail.read_from_string(content)
+            if mail.multipart?
+              html_part = mail.html_part
+              text_part = mail.text_part
+              content_parsed =  if html_part
+                                  html_part.decoded
+                                elsif text_part
+                                  text_part.decoded
+                                else
+                                  mail.parts.first.decoded
+                                end
+            else
+              content_parsed = mail.body.decoded
+            end
+            contents << content_parsed
+          end          
           api_url = "https://desk.zoho.in/api/v1/tickets/#{ticket_id}/sendReply"
           reply_data = {
             channel: "EMAIL",
             fromEmailAddress: assigneer_email,
             to: recipient_email,
-            content:contents[0],
+            content: "<p>Note: #{note.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '')}</p><p>#{contents[0].encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '')}</p>",
             contentType: 'html',
             isForward: 'true',
             isPrivate:'true'
             }
                       # cc: params[:cc],
-          p "========================= response ====================================="
-          response = HTTParty.post(api_url,
-                                   headers: {
-                                     'Authorization' => "Zoho-oauthtoken #{access_token}",
-                                     'Content-Type' => 'application/json'
-                                   },
-                                   body: reply_data.to_json)
-          p response
-          p "========================= response ====================================="
+          response = HTTParty.post(api_url,headers: {'Authorization' => "Zoho-oauthtoken #{access_token}",'Content-Type' => 'application/json'},body: reply_data.to_json)
           if response.code == 200
             p "success"
+            ticket_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+            if ticket_response.code == 200
+              ticket_response.parsed_response
+            else
+              nil
+            end
+            update_payload = {
+              "customFields" => {
+                "Assigned To" => assign_to,
+                "Assigned Date" => "2024-04-24T00:00:00.000Z",  # Use ISO 8601 date format
+                "Note" => note,
+                "Completion Date" => "2024-04-30T00:00:00.000Z" # Use ISO 8601 date format
+              }
+            }
+
+            ticket_update_response = HTTParty.put("https://desk.zoho.in/api/v1/tickets/#{ticket_id}",
+            headers: {'Authorization' => "Zoho-oauthtoken #{access_token}",'Content-Type' => 'application/json'},
+            body: update_payload.to_json)
+            if ticket_update_response.code == 200
+              puts "Ticket successfully updated."
+            else
+              puts "Failed to update the ticket. Response code: #{ticket_update_response.code}"
+              puts "Response message: #{ticket_update_response.body}"
+            end
+
           else
             p "error"
             p response.code
