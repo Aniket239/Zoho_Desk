@@ -44,6 +44,7 @@ class TicketsController < ApplicationController
       redirect_to tickets_index_path
     end
   end
+  
   def threads
     ticket_id = params[:ticketId]
     cookies[:ticket_id] = ticket_id
@@ -106,5 +107,11 @@ class TicketsController < ApplicationController
       p "error"
       p response.code
     end
-  end   
+  end
+  def issue
+
+  end
+  def issue_solved
+    
+  end
 end

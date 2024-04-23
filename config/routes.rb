@@ -24,5 +24,9 @@ Rails.application.routes.draw do
   get 'tickets/emailTest', to: 'tickets#emailTest'
   get 'tickets/reports'
   post 'tickets/reports'
+  get 'tickets/issue'
+  post 'tickets/issue'
+  get 'tickets/issue_solved'
+  post 'tickets/issue_solved'
 
 end

@@ -3,11 +3,9 @@ require 'mail'
 require 'date'
 require 'httparty'
 
-
-# config/initializers/scheduler.rb
 Rails.application.config.after_initialize do
 Thread.new do
-    sleep(20)  # Waits 10 seconds for the server to definitely be up
+    sleep(20)
     puts "Scheduler thread started"
     run_scheduler
     end
@@ -15,56 +13,35 @@ end
 
 
 def run_scheduler  
-    # Ensure the server's PID file exists
     pidfile_path = Rails.root.join('tmp', 'pids', 'server.pid')
     if File.exist?(pidfile_path)
         scheduler = Rufus::Scheduler.new
         now = Time.now
         desired_time = Time.new(now.year, now.month, now.day, 11, 00)
         first_run_time = desired_time > now ? desired_time : desired_time + 1.day
-        
-        # Schedule the job to run every day at 13:20
         scheduler.every '1d', first_in: first_run_time - now do
             begin
                 ticketsOpenForMoreThan72hrs
             rescue Net::OpenTimeout => e
                 puts "Encountered a timeout, will retry: #{e.message}"
-                sleep 10 # wait 10 seconds before retrying
+                sleep 10
             retry
             rescue => e
                 puts "Failed to execute job: #{e.message}"
             end
         end
         now = Time.now
-
-        # # Desired weekly time at 14:01
-        # next_run_time = now + ((1 + 6 - now.wday) % 7).days # Next Monday
-        # desired_time_weekly = Time.new(next_run_time.year, next_run_time.month, next_run_time.day, 10, 30)
-        
-        # # Calculate first run time for the weekly job: if it's past 14:01 this Monday, schedule for next Monday
-        # first_run_time_weekly = desired_time_weekly > now ? desired_time_weekly : desired_time_weekly + 7.days
-        
-        # # Schedule the task to run every week starting from the calculated first run time at 14:01
-        # scheduler.every '1w', first_in: (first_run_time_weekly - now) do
-
-            # Calculate the next Tuesday
-            days_until_tuesday = (2 - now.wday) % 7
-            days_until_tuesday = 7 if days_until_tuesday == 0 && now.hour > 10 || (now.hour == 10 && now.min > 30)
-            next_tuesday = now + days_until_tuesday.days
-
-            # Desired time at 10:30 on the next Tuesday
-            desired_time_tuesday = Time.new(next_tuesday.year, next_tuesday.month, next_tuesday.day, 10, 30)
-
-            # Calculate first run time for the weekly job: if it's past 10:30 this Tuesday, schedule for next Tuesday
-            first_run_time_tuesday = desired_time_tuesday > now ? desired_time_tuesday : desired_time_tuesday + 7.days
-
-            # Schedule the task to run every week starting from the calculated first run time at 10:30
-            scheduler.every '1w', first_in: (first_run_time_tuesday - now) do
+        days_until_monday = (1 - now.wday) % 7
+        days_until_monday = 7 if days_until_monday == 0 && now.hour > 10 || (now.hour == 10 && now.min > 30)
+        next_monday = now + days_until_monday.days
+        desired_time_monday = Time.new(next_monday.year, next_monday.month, next_monday.day, 10, 30)
+        first_run_time_monday = desired_time_monday > now ? desired_time_monday : desired_time_monday + 7.days
+        scheduler.every '1w', first_in: (first_run_time_monday - now) do
             begin
                 ticketClosedAfter72Hours
             rescue Net::OpenTimeout => e
                 puts "Encountered a timeout, will retry: #{e.message}"
-                sleep 10 # wait 10 seconds before retrying
+                sleep 10
             retry
             rescue => e
                 puts "Failed to execute job: #{e.message}"

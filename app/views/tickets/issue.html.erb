@@ -1,0 +1,57 @@
+<%# Use a specific layout that does not include the navbar, or modify the application layout conditionally %>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            /* Modern font */
+            background-color: #f4f4f4;
+            /* Light grey background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin: 0 0 8px 0;
+        }
+
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            float:right;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+
+    <%= form_tag('/your_action_url', method: :post) do %>
+        <h1>Remarks/Comment</h1>
+        <%= text_area_tag :remarks, nil, size: "60x12" %>
+        <%= submit_tag 'Solved' %>
+    <% end %>
