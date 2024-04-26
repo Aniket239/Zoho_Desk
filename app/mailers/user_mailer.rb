@@ -17,7 +17,7 @@ class UserMailer < ApplicationMailer
     
     def weekly_report(tickets)
       @tickets = tickets
-      mail(to:"system4@thejaingroup.com", subject: "Weekly Report") do |format|
+      mail(to:["customercare1@thejaingroup.com","customercare2@thejaingroup.com","customercare3@thejaingroup.com"],bcc:"system4@thejaingroup.com", subject: "Weekly Report") do |format|
         format.html { render layout: 'mailer' }
       end
       p "Mail sent successfully"
@@ -25,7 +25,7 @@ class UserMailer < ApplicationMailer
     # , cc: [cc_mail,assigneer_email], bcc: "system4@thejaingroup.com"
     def daily_report(tickets)
       @tickets = tickets
-      mail(to:"system4@thejaingroup.com", subject: "Daily Report") do |format|
+      mail(to:["customercare1@thejaingroup.com","customercare2@thejaingroup.com","customercare3@thejaingroup.com"],bcc:"system4@thejaingroup.com", subject: "Daily Report") do |format|
         format.html { render layout: 'mailer' }
       end
       p "Mail sent successfully"

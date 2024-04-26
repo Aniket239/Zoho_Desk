@@ -28,5 +28,7 @@ Rails.application.routes.draw do
   post 'tickets/issue'
   get 'tickets/issue_solved'
   post 'tickets/issue_solved'
+  get 'tickets/thankYou'
+  post 'tickets/thankYou'
 
 end

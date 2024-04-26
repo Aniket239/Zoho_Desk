@@ -109,9 +109,54 @@ class TicketsController < ApplicationController
     end
   end
   def issue
-
+    @ticket_id = params[:ticketId]
+    @agent_id = params[:agent_id]
+    @assignee_name = params[:assignee_name]
   end
   def issue_solved
-    
+    comment = params[:remarks]
+    ticket_id = params[:ticket_id]
+    agent_id = params[:agent_id]
+    assignee_name = params[:assignee_name]
+    access_token = refresh_access_token
+    agent_response = HTTParty.get("https://desk.zoho.in/api/v1/agents/#{agent_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+    zuid=agent_response.parsed_response["zuid"]
+    if agent_response.code == 200
+      body = {
+        isPublic: true,
+        contentType: "html",
+        content: "zsu[@user:#{zuid}]zsu ||  From: #{assignee_name} ||  Comment: #{comment}"
+      }.to_json
+      comment_response = HTTParty.post("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/comments",
+                                       headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" },
+                                       body: body)
+      if comment_response.code == 200
+        update_payload = {
+              "customFields" => {
+                "Completion Date"=>Time.now.utc.iso8601
+              }
+            }
+
+            ticket_update_response = HTTParty.put("https://desk.zoho.in/api/v1/tickets/#{ticket_id}",
+            headers: {'Authorization' => "Zoho-oauthtoken #{access_token}",'Content-Type' => 'application/json'},
+            body: update_payload.to_json)
+            if ticket_update_response.code == 200
+              unread_response = HTTParty.post("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/markAsUnRead", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+              puts "Ticket successfully updated."
+            else
+              puts "Failed to update the ticket. Response code: #{ticket_update_response.code}"
+              puts "Response message: #{ticket_update_response.body}"
+            end
+        redirect_to tickets_thankYou_path, notice: 'Comment successfully added.'
+      else
+        render plain: "Failed to add comment: #{comment_response['message']}", status: :unprocessable_entity
+      end
+    else
+      render plain: "Failed to retrieve agent information", status: :unprocessable_entity
+    end
+  end
+  
+  def thankYou
+
   end
 end

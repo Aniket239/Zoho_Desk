@@ -7,7 +7,7 @@
   <%= csrf_meta_tags %>
 </head>
 <body>
-  <% unless controller_name == 'tickets' && action_name == 'issue' %>
+  <% unless controller_name == 'tickets' && action_name == 'issue' || action_name == "thankYou" %>
     <%= render 'layouts/navbar' %>
   <% end %>
   <%= yield %>
