@@ -1,66 +1,148 @@
-<style>
-    body {
-        font-family: 'Arial', sans-serif;
-        background-color: #f4f4f4;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-        color: #333; /* Standard text color for better readability */
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        form {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .center{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ccc;
+            background-color: white;
+            border-radius: 6px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            font-size: 16px;
+            height: 150px;
+        }
+
+        input[type="submit"] {
+            background-color: #007BFF;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            float: right;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #333;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 800px) {
+        form {
+            padding: 20px;
+            margin-top: -30%;
+        }
+        h1 {
+            font-size: 24px;
+            text-align: left; /* Smaller font size on smaller screens */
+        }
+        textarea {
+            font-size: 14px;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
     }
-
-    form {
-        background: #ffffff;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        width: 90%;
-        max-width: 600px; /* Slightly wider form */
-        box-sizing: border-box;
-    }
-
-    h1 {
-        font-size: 28px; /* Larger font size for heading */
-        color: #333;
-        margin-bottom: 20px; /* More space under the heading */
-    }
-
-    textarea {
-        width: 100%;
-        padding: 15px;
-        border: 2px solid #ccc; /* Slightly thicker border */
-        border-radius: 6px; /* Rounded corners */
-        box-sizing: border-box;
-        margin-bottom: 20px; /* Increased space between textarea and button */
-        font-size: 16px; /* Larger font for easier reading */
-        height: 150px; /* Larger fixed height */
-    }
-
-    input[type="submit"] {
-        background-color: #007BFF; /* Modern blue */
-        color: white;
-        padding: 12px 25px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        float: right; /* Positioning to the right */
-        font-weight: bold; /* Bold font for the button */
-        font-size: 16px; /* Larger button text */
-        transition: background-color 0.3s; /* Smooth transition for hover effect */
-    }
-
-    input[type="submit"]:hover {
-        background-color: #0056b3; /* Darker blue on hover */
-    }
-</style>
+    </style>
+</head>
 
 
+<body>
+    <div id="loading-overlay">
+        <div id="loading-spinner"></div>
+    </div>
     <%= form_tag(tickets_issue_solved_url, method: :post) do %>
         <%= hidden_field_tag :ticket_id, @ticket_id %>
         <%= hidden_field_tag :agent_id, @agent_id %>
-        <%= hidden_field_tag :assignee_name, @assignee_name %>        
+        <%= hidden_field_tag :assignee_name, @assignee_name %>
         <h1>Remarks/Comment</h1>
-        <%= text_area_tag :remarks, nil, placeholder: "Enter your comments here...", size: "60x12" %>
-        <%= submit_tag 'Solved' %>
+        <div class="center">
+            <%= text_area_tag :remarks, nil, placeholder: "Enter your comments here..." , size: "60x12" %>
+            <%= submit_tag 'Solved' %>
+        </div>
     <% end %>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('form');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingSpinner = document.getElementById('loading-spinner');
+
+        loadingOverlay.style.display = 'none';  // Ensure overlay is hidden
+        loadingSpinner.style.display = 'none';  // Ensure spinner is hidden
+
+        form.addEventListener('submit', function () {
+            loadingOverlay.style.display = 'flex';  // Show loading overlay
+            loadingSpinner.style.display = 'block';  // Show loading spinner
+        });
+    });
+</script>

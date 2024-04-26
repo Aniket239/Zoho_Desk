@@ -1,15 +1,66 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>ZohoDesk</title>
-  <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
+  <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track' => true %>
+  <style>
+    .notice {
+      width: 30vw;
+      text-align: center;
+      color: green;
+      background-color: #ccffcc;
+      padding: 10px;
+      border-radius: 6px;
+      margin: 3% 0 0 0;
+      border: 1px solid green;
+      opacity: 1;
+      transition: opacity 2s; /* Transition for fading effect */
+    }
+    .hidden {
+      opacity: 0;
+      visibility: hidden;
+      transition: visibility 0s 2s, opacity 2s linear;
+    }
+    @media (max-width: 800px) {
+      .notice {
+      width: 60vw;
+      text-align: center;
+      color: green;
+      background-color: #ccffcc;
+      padding: 10px;
+      border-radius: 6px;
+      margin: 3% 0;
+      border: 1px solid green;
+      opacity: 1;
+      transition: opacity 2s; /* Transition for fading effect */
+    }
+    }
+  </style>
   <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
   <%= csrf_meta_tags %>
 </head>
+
 <body>
   <% unless controller_name == 'tickets' && action_name == 'issue' || action_name == "thankYou" %>
     <%= render 'layouts/navbar' %>
   <% end %>
+  <% if flash[:notice] %>
+    <div class="notice" id="notice">
+      <%= flash[:notice] %>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        setTimeout(function() {
+          var notice = document.getElementById('notice');
+          if (notice) {
+            notice.classList.add('hidden');
+          }
+        }, 3000);
+      });
+    </script>
+  <% end %>
   <%= yield %>
 </body>
+
 </html>

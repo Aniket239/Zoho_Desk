@@ -147,7 +147,7 @@ class TicketsController < ApplicationController
               puts "Failed to update the ticket. Response code: #{ticket_update_response.code}"
               puts "Response message: #{ticket_update_response.body}"
             end
-        redirect_to tickets_thankYou_path, notice: 'Comment successfully added.'
+        redirect_to tickets_thankYou_path, notice: 'Issue solved successfully.'
       else
         render plain: "Failed to add comment: #{comment_response['message']}", status: :unprocessable_entity
       end
