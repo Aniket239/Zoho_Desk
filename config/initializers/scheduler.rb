@@ -2,8 +2,17 @@ require 'rufus-scheduler'
 require 'mail'
 require 'date'
 require 'httparty'
+require 'listen'
 
 Rails.application.config.after_initialize do
+if Rails.env.development?
+    listener = Listen.to('app/services', only: /\.rb$/) do |modified, added, removed|
+        puts "Detected changes in services, restarting scheduler..."
+        Thread.kill(@scheduler_thread) if @scheduler_thread
+        @scheduler_thread = Thread.new { run_scheduler }
+    end
+    listener.start
+end
 Thread.new do
     sleep(20)
     puts "Scheduler thread started"
@@ -19,7 +28,7 @@ def run_scheduler
         now = Time.now
         desired_time = Time.new(now.year, now.month, now.day, 11, 00)
         first_run_time = desired_time > now ? desired_time : desired_time + 1.day
-        scheduler.every '1d', first_in: first_run_time - now do
+        scheduler.every '1d', first_in: first_run_time - now,:allow_overlapping => false do
             begin
                 ticketsOpenForMoreThan72hrs
             rescue Net::OpenTimeout => e
@@ -36,7 +45,7 @@ def run_scheduler
         next_monday = now + days_until_monday.days
         desired_time_monday = Time.new(next_monday.year, next_monday.month, next_monday.day, 10, 30)
         first_run_time_monday = desired_time_monday > now ? desired_time_monday : desired_time_monday + 7.days
-        scheduler.every '1w', first_in: (first_run_time_monday - now) do
+        scheduler.every '1w', first_in: (first_run_time_monday - now),:allow_overlapping => false do
             begin
                 ticketClosedAfter72Hours
             rescue Net::OpenTimeout => e
@@ -46,6 +55,9 @@ def run_scheduler
             rescue => e
                 puts "Failed to execute job: #{e.message}"
             end
+        end
+        scheduler.every '1m', :allow_overlapping => false do
+            assignee_reminder
         end
     end
 end 
@@ -125,9 +137,6 @@ def ticketClosedAfter72Hours
                     if ticket["status"] == "Closed" && close_time >= beginning_of_last_week && close_time < beginning_of_this_week
                         if (((DateTime.parse(ticket["closedTime"]) - DateTime.parse(ticket["createdTime"]))* 24).to_f) > 72
                             ticket_id<<ticket["ticketNumber"].to_i
-                            p "================================== close time ======================="
-                            p close_time
-                            p "================================== close time ======================="
                         end
                     end
                 end
@@ -141,30 +150,18 @@ def ticketClosedAfter72Hours
                         if ticket["status"] == "Closed" && close_time >= beginning_of_last_week && close_time < beginning_of_this_week
                             if (((DateTime.parse(ticket["closedTime"]) - DateTime.parse(ticket["createdTime"]))* 24).to_f) > 72
                                 ticket_id<<ticket["ticketNumber"].to_i
-                                p "================================== close time ======================="
-                                p close_time
-                                p "================================== close time ======================="
                             end
                         end
                     end
                 end
             end
-            p "========================================================= tickets closed by #{id} of #{name}after 72 hours =========================="
-            p ticket_id.sort
-            p "Ticket id count of tickets  closed after 72 hr: #{ticket_id.count}"
-            p "closed ticket count: #{closed_count}"
-            p total_tickets
             tickets[name] = ((ticket_id.count.to_f / total_tickets) * 100).round(2)
-            p "========================================================= tickets closed by #{id} of #{name} after 72 hours =========================="
         end
-        p tickets
-        p Time.now
         UserMailer.weekly_report(tickets).deliver_now
     else
         p "error while getting access token"
     end
 end
-
 
 def ticketsOpenForMoreThan72hrs
     access_token_response = access_token
@@ -220,13 +217,9 @@ def ticketsOpenForMoreThan72hrs
                     open_time=Date.parse(ticket["createdTime"])
                     current_time = DateTime.now
                     if ticket["status"] == "Open"
-                        p "================ time ================================"
-                        p DateTime.parse(ticket["createdTime"])
+                        DateTime.parse(ticket["createdTime"])
                         if ((current_time - DateTime.parse(ticket["createdTime"])) * 24.to_f) > 96
                             ticket_id<<ticket["ticketNumber"].to_i
-                            p "================================== open time ======================="
-                            p open_time
-                            p "================================== open time ======================="
                         end
                     end
                 end
@@ -238,23 +231,13 @@ def ticketsOpenForMoreThan72hrs
                         if ticket["status"] == "Open"
                             if ((current_time - DateTime.parse(ticket["createdTime"])) * 24.to_f) > 72
                                 ticket_id<<ticket["ticketNumber"].to_i
-                                p "================================== open time ======================="
-                                p open_time
-                                p "================================== open time ======================="
                             end
                         end
                     end
                 end
             end
-            p "========================================================= tickets open by #{id} of #{name}after 72 hours =========================="
-            p ticket_id.sort
-            p "Ticket id count of tickets  open for 72 hr: #{ticket_id.count}"
-            p "open ticket count: #{open_count}"
             tickets[name] = ticket_id.count
-            p "========================================================= tickets open by #{id} of #{name} after 72 hours =========================="
         end
-        p tickets
-        p Time.now
         UserMailer.daily_report(tickets).deliver_now
     else
         p "error while getting access token"
@@ -283,7 +266,9 @@ def assignee_reminder
             else
                 name = "Sarnali Haldar"
             end
-            ticket_count_response= HTTParty.get("https://desk.zoho.in/api/v1/ticketsCountByFieldValues?field=status&assigneeId=#{id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+            p "====================== ticket response  ================================"
+            p ticket_count_response= HTTParty.get("https://desk.zoho.in/api/v1/ticketsCountByFieldValues?field=status&assigneeId=#{id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+            p "====================== ticket response ================================"
             open_status = ticket_count_response["status"].find { |status| status["value"] == "open" }
             open_count = open_status ? open_status["count"].to_i : 0                
             if open_count>100
@@ -315,13 +300,9 @@ def assignee_reminder
                     open_time=Date.parse(ticket["createdTime"])
                     current_time = DateTime.now
                     if ticket["status"] == "Open"
-                        p "================ time ================================"
-                        p DateTime.parse(ticket["createdTime"])
+                        DateTime.parse(ticket["createdTime"])
                         if ((current_time - DateTime.parse(ticket["createdTime"])) * 24.to_f) > 96
                             ticket_id<<ticket["ticketNumber"].to_i
-                            p "================================== open time ======================="
-                            p open_time
-                            p "================================== open time ======================="
                         end
                     end
                 end
@@ -341,16 +322,9 @@ def assignee_reminder
                     end
                 end
             end
-            p "========================================================= tickets open by #{id} of #{name}after 72 hours =========================="
-            p ticket_id.sort
-            p "Ticket id count of tickets  open for 72 hr: #{ticket_id.count}"
-            p "open ticket count: #{open_count}"
             tickets[name] = ticket_id.count
-            p "========================================================= tickets open by #{id} of #{name} after 72 hours =========================="
         end
-        p tickets
-        p Time.now
-        UserMailer.daily_report(tickets).deliver_now
+        # UserMailer.daily_report(tickets).deliver_now
     else
         p "error while getting access token"
     end
