@@ -317,14 +317,14 @@ def assignee_reminder
                 if custom_fields["Assigned To"] != nil || custom_fields["Assign To"] != nil
                     if custom_fields["Completion Date"] == nil
                         if custom_fields["Assigned To"]
+                            mail_data["id"] = id
+                            p subject = ticket_response["subject"]
+                            mail_data["subject"] = subject
                             p assignee_email = custom_fields["Assigned To"].slice(custom_fields["Assigned To"].rindex(" ")+1,custom_fields["Assigned To"].length)
                             mail_data["assignee_email"] = assignee_email
                             p assigned_date = custom_fields["Assigned Date"]
                             mail_data["assigned_date"] = assigned_date
                             p id
-                            mail_data["id"] = id
-                            p subject = ticket_response["subject"]
-                            mail_data["subject"] = subject
                             assignee_id = ticket_response["assigneeId"]
                             mail_data["assignee_id"] = assignee_id
                             agent_response = HTTParty.get("https://desk.zoho.in/api/v1/agents/#{assignee_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
