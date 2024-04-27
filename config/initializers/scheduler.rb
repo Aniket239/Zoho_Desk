@@ -56,7 +56,7 @@ def run_scheduler
                 puts "Failed to execute job: #{e.message}"
             end
         end
-        scheduler.every '1m', :allow_overlapping => false do
+        scheduler.every '1m', :allow_overlapping => false, :overlap=>false do
             assignee_reminder
         end
     end
@@ -229,7 +229,7 @@ def ticketsOpenForMoreThan72hrs
                         open_time=Date.parse(ticket["createdTime"])
                         current_time = DateTime.now
                         if ticket["status"] == "Open"
-                            if ((current_time - DateTime.parse(ticket["createdTime"])) * 24.to_f) > 72
+                            if ((current_time - DateTime.parse(ticket["createdTime"])) * 24.to_f) > 96
                                 ticket_id<<ticket["ticketNumber"].to_i
                             end
                         end
@@ -266,13 +266,19 @@ def assignee_reminder
             else
                 name = "Sarnali Haldar"
             end
-            p "====================== ticket response  ================================"
-            p ticket_count_response= HTTParty.get("https://desk.zoho.in/api/v1/ticketsCountByFieldValues?field=status&assigneeId=#{id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-            p "====================== ticket response ================================"
-            open_status = ticket_count_response["status"].find { |status| status["value"] == "open" }
-            open_count = open_status ? open_status["count"].to_i : 0                
-            if open_count>100
-                loop_count = open_count/100.0
+            ticket_count_response= HTTParty.get("https://desk.zoho.in/api/v1/ticketsCountByFieldValues?field=status&assigneeId=#{id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+            open_count= 0
+            not_to_respond_count = 0
+            ticket_count_response.parsed_response["status"].each do |status|
+                if status["value"] == "open"
+                    open_count = status["count"].to_i
+                elsif status["value"] == "not to respond"
+                    not_to_respond_count = status["count"].to_i
+                end
+            end
+            all_tickets_count = open_count + not_to_respond_count              
+            if all_tickets_count>100
+                loop_count = all_tickets_count/100.0
                 loop_count_int = loop_count.to_i
                 if loop_count>loop_count_int
                     loop_count_int = loop_count_int+1
@@ -280,52 +286,63 @@ def assignee_reminder
             else
                 loop_count_int = 1
             end
-            all_open_tickets=[]
+            all_tickets_id=[]
             if loop_count_int==1
-                open_tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=open&from=0&limit=100", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-                all_open_tickets<<open_tickets_response
+                tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=open,not to respond&fields&from=1&limit=99", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+                tickets_response.parsed_response["data"].each do |tickets|
+                    all_tickets_id << tickets["id"].to_i
+                end    
             elsif loop_count_int>1
                 (1..loop_count_int).each do |i|
+                    ticket_count = []
                     if i==1
-                        open_tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=open&from=0&limit=99", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-                        all_open_tickets<<open_tickets_response
+                        tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=open,not to respond&fields&from=0&limit=99", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+                        tickets_response["data"].each do |tickets|
+                            all_tickets_id << tickets["id"].to_i
+                        end 
                     else
-                        open_tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=open&from=#{(i-1)*100}&limit=99", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-                        all_open_tickets<<open_tickets_response 
+                        tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=open,not to respond&fields&from=#{(i-1)*100}&limit=100", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+                        tickets_response["data"].each do |tickets|
+                            all_tickets_id << tickets["id"].to_i
+                        end  
                     end
+                    p all_tickets_id
                 end 
             end
-            if all_open_tickets.count==1
-                open_tickets_response["data"].each do |ticket|
-                    open_time=Date.parse(ticket["createdTime"])
-                    current_time = DateTime.now
-                    if ticket["status"] == "Open"
-                        DateTime.parse(ticket["createdTime"])
-                        if ((current_time - DateTime.parse(ticket["createdTime"])) * 24.to_f) > 96
-                            ticket_id<<ticket["ticketNumber"].to_i
-                        end
-                    end
-                end
-            else
-                all_open_tickets.each do |tickets|
-                    tickets["data"].each do |ticket|
-                        open_time=Date.parse(ticket["createdTime"])
-                        current_time = DateTime.now
-                        if ticket["status"] == "Open"
-                            if ((current_time - DateTime.parse(ticket["createdTime"])) * 24.to_f) > 72
-                                ticket_id<<ticket["ticketNumber"].to_i
-                                p "================================== open time ======================="
-                                p open_time
-                                p "================================== open time ======================="
-                            end
-                        end
+            p "=================================================="
+            mail_data = {}
+            all_tickets_id.each do |id|
+                ticket_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{id}",  headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+                custom_fields = ticket_response["customFields"]
+                if custom_fields["Assigned To"] != nil || custom_fields["Assign To"] != nil
+                    if custom_fields["Completion Date"] == nil
+                        if custom_fields["Assigned To"]
+                            p assignee_email = custom_fields["Assigned To"].slice(custom_fields["Assigned To"].rindex(" ")+1,custom_fields["Assigned To"].length)
+                            mail_data["assignee_email"] = assignee_email
+                            p assigned_date = custom_fields["Assigned Date"]
+                            mail_data["assigned_date"] = assigned_date
+                            p id
+                            mail_data["id"] = id
+                            p subject = ticket_response["subject"]
+                            mail_data["subject"] = subject
+                            assignee_id = ticket_response["assigneeId"]
+                            mail_data["assignee_id"] = assignee_id
+                            agent_response = HTTParty.get("https://desk.zoho.in/api/v1/agents/#{assignee_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+                            p assignee_name = agent_response.parsed_response["name"]
+                            mail_data["assignee_name"] = assignee_name
+                        end    
                     end
                 end
             end
-            tickets[name] = ticket_id.count
+            p "=================================================="
+            p mail_data
+            p "=================================================="
         end
         # UserMailer.daily_report(tickets).deliver_now
+        p tickets
     else
         p "error while getting access token"
     end
 end
+
+assignee_reminder
