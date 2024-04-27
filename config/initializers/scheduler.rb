@@ -310,8 +310,9 @@ def assignee_reminder
                 end 
             end
             p "=================================================="
-            mail_data = {}
+            all_mail_data = []
             all_tickets_id.each do |id|
+                mail_data = {}
                 ticket_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{id}",  headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
                 custom_fields = ticket_response["customFields"]
                 if custom_fields["Assigned To"] != nil || custom_fields["Assign To"] != nil
@@ -330,12 +331,28 @@ def assignee_reminder
                             agent_response = HTTParty.get("https://desk.zoho.in/api/v1/agents/#{assignee_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
                             p assignee_name = agent_response.parsed_response["name"]
                             mail_data["assignee_name"] = assignee_name
+                        else 
+                            mail_data["id"] = id
+                            p subject = ticket_response["subject"]
+                            mail_data["subject"] = subject
+                            p assignee_email = custom_fields["Assign To"].slice(custom_fields["Assign To"].rindex(" ")+1,custom_fields["Assign To"].length)
+                            mail_data["assignee_email"] = assignee_email
+                            p assigned_date = custom_fields["Assigned Date"]
+                            mail_data["assigned_date"] = assigned_date
+                            p id
+                            assignee_id = ticket_response["assigneeId"]
+                            mail_data["assignee_id"] = assignee_id
+                            agent_response = HTTParty.get("https://desk.zoho.in/api/v1/agents/#{assignee_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+                            p assignee_name = agent_response.parsed_response["name"]
+                            mail_data["assignee_name"] = assignee_name
                         end    
                     end
                 end
+                    all_mail_data << mail_data unless mail_data.empty?
             end
             p "=================================================="
-            p mail_data
+            p "=================================================="
+            p all_mail_data
             p "=================================================="
         end
         # UserMailer.daily_report(tickets).deliver_now
