@@ -308,7 +308,8 @@ def assignee_reminder
                     p all_tickets_id
                 end 
             end
-            all_mail_data = []
+            mail_datas = []
+            assignee_emails = []
             all_tickets_id.each do |id|
                 mail_data = {}
                 ticket_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{id}",  headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
@@ -319,6 +320,7 @@ def assignee_reminder
                             mail_data["id"] = id
                             mail_data["subject"] = ticket_response["subject"]
                             mail_data["assignee_email"] = custom_fields["Assigned To"].slice(custom_fields["Assigned To"].rindex(" ")+1,custom_fields["Assigned To"].length)
+                            assignee_emails << mail_data["assignee_email"]
                             mail_data["assigned_date"] = custom_fields["Assigned Date"]
                             mail_data["agent_id"] = ticket_response["assigneeId"]
                             agent_response = HTTParty.get("https://desk.zoho.in/api/v1/agents/#{mail_data["agent_id"]}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
@@ -326,12 +328,14 @@ def assignee_reminder
                         end    
                     end
                 end
-                all_mail_data << mail_data unless mail_data.empty?
+                mail_datas << mail_data unless mail_data.empty?
             end
             p "=================================================="
-            p mail_sorted_data = all_mail_data.sort_by { |item| item["assignee_email"] }
-            p "=================================================="
-            UserMailer.assignee_remionder(mail_sorted_data).deliver_now
+            p mail_sorted_datas = mail_datas.sort_by { |item| item["assignee_email"] }
+            assignee_emails.uniq!.each do |assignee_email|
+                
+            end
+            UserMailer.assignee_reminder(mail_datas,assignee_emails).deliver_now
         end
     else
         p "error while getting access token"

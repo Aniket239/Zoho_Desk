@@ -36,6 +36,7 @@ class UserMailer < ApplicationMailer
         p "================== data ==============================="
         p data
         p "================== data ==============================="
+        
       end
     end
 end
