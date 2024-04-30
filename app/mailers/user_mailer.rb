@@ -31,6 +31,11 @@ class UserMailer < ApplicationMailer
       p "Mail sent successfully"
     end  
 
-# ["customercare1@thejaingroup.com","customercare2@thejaingroup.com","customercare3@thejaingroup.com"],bcc:
-# ["customercare1@thejaingroup.com","customercare2@thejaingroup.com","customercare3@thejaingroup.com"],bcc:
+    def assignee_reminder(mail_data)
+      mail_data.each do |data|
+        p "================== data ==============================="
+        p data
+        p "================== data ==============================="
+      end
+    end
 end

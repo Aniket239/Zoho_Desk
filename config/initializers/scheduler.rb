@@ -256,7 +256,6 @@ def assignee_reminder
             agent_id<<agent["id"]
             agent_name<<agent["name"]
         end    
-        tickets={}
         agent_id.each do |id|
             ticket_id=[]
             if id == "142173000000064001"
@@ -309,7 +308,6 @@ def assignee_reminder
                     p all_tickets_id
                 end 
             end
-            p "=================================================="
             all_mail_data = []
             all_tickets_id.each do |id|
                 mail_data = {}
@@ -319,47 +317,23 @@ def assignee_reminder
                     if custom_fields["Completion Date"] == nil
                         if custom_fields["Assigned To"]
                             mail_data["id"] = id
-                            p subject = ticket_response["subject"]
-                            mail_data["subject"] = subject
-                            p assignee_email = custom_fields["Assigned To"].slice(custom_fields["Assigned To"].rindex(" ")+1,custom_fields["Assigned To"].length)
-                            mail_data["assignee_email"] = assignee_email
-                            p assigned_date = custom_fields["Assigned Date"]
-                            mail_data["assigned_date"] = assigned_date
-                            p id
-                            assignee_id = ticket_response["assigneeId"]
-                            mail_data["assignee_id"] = assignee_id
-                            agent_response = HTTParty.get("https://desk.zoho.in/api/v1/agents/#{assignee_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-                            p assignee_name = agent_response.parsed_response["name"]
-                            mail_data["assignee_name"] = assignee_name
-                        else 
-                            mail_data["id"] = id
-                            p subject = ticket_response["subject"]
-                            mail_data["subject"] = subject
-                            p assignee_email = custom_fields["Assign To"].slice(custom_fields["Assign To"].rindex(" ")+1,custom_fields["Assign To"].length)
-                            mail_data["assignee_email"] = assignee_email
-                            p assigned_date = custom_fields["Assigned Date"]
-                            mail_data["assigned_date"] = assigned_date
-                            p id
-                            assignee_id = ticket_response["assigneeId"]
-                            mail_data["assignee_id"] = assignee_id
-                            agent_response = HTTParty.get("https://desk.zoho.in/api/v1/agents/#{assignee_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-                            p assignee_name = agent_response.parsed_response["name"]
-                            mail_data["assignee_name"] = assignee_name
+                            mail_data["subject"] = ticket_response["subject"]
+                            mail_data["assignee_email"] = custom_fields["Assigned To"].slice(custom_fields["Assigned To"].rindex(" ")+1,custom_fields["Assigned To"].length)
+                            mail_data["assigned_date"] = custom_fields["Assigned Date"]
+                            mail_data["agent_id"] = ticket_response["assigneeId"]
+                            agent_response = HTTParty.get("https://desk.zoho.in/api/v1/agents/#{mail_data["agent_id"]}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+                            mail_data["agent_name"] = agent_response.parsed_response["name"]
                         end    
                     end
                 end
-                    all_mail_data << mail_data unless mail_data.empty?
+                all_mail_data << mail_data unless mail_data.empty?
             end
             p "=================================================="
+            p mail_sorted_data = all_mail_data.sort_by { |item| item["assignee_email"] }
             p "=================================================="
-            p all_mail_data
-            p "=================================================="
+            UserMailer.assignee_remionder(mail_sorted_data).deliver_now
         end
-        # UserMailer.daily_report(tickets).deliver_now
-        p tickets
     else
         p "error while getting access token"
     end
 end
-
-assignee_reminder
