@@ -287,7 +287,7 @@ def assignee_reminder
             end
             all_tickets_id=[]
             if loop_count_int==1
-                tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=open,not to respond&fields&from=1&limit=99", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+                tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=open&fields&from=1&limit=99", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
                 tickets_response.parsed_response["data"].each do |tickets|
                     all_tickets_id << tickets["id"].to_i
                 end    
@@ -295,17 +295,16 @@ def assignee_reminder
                 (1..loop_count_int).each do |i|
                     ticket_count = []
                     if i==1
-                        tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=open,not to respond&fields&from=0&limit=99", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+                        tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=open&fields&from=0&limit=99", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
                         tickets_response["data"].each do |tickets|
                             all_tickets_id << tickets["id"].to_i
                         end 
                     else
-                        tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=open,not to respond&fields&from=#{(i-1)*100}&limit=100", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
+                        tickets_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets?assignee=#{id}&status=open&fields&from=#{(i-1)*100}&limit=100", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
                         tickets_response["data"].each do |tickets|
                             all_tickets_id << tickets["id"].to_i
                         end  
                     end
-                    p all_tickets_id
                 end 
             end
             mail_datas = []
@@ -320,6 +319,7 @@ def assignee_reminder
                             mail_data["id"] = id
                             mail_data["subject"] = ticket_response["subject"]
                             mail_data["assignee_email"] = custom_fields["Assigned To"].slice(custom_fields["Assigned To"].rindex(" ")+1,custom_fields["Assigned To"].length)
+                            mail_data["assignee_name"] = custom_fields["Assigned To"].slice(0,custom_fields["Assigned To"].rindex(" ")+1)
                             assignee_emails << mail_data["assignee_email"]
                             mail_data["assigned_date"] = custom_fields["Assigned Date"]
                             mail_data["agent_id"] = ticket_response["assigneeId"]
@@ -330,14 +330,42 @@ def assignee_reminder
                 end
                 mail_datas << mail_data unless mail_data.empty?
             end
-            p "=================================================="
-            p mail_sorted_datas = mail_datas.sort_by { |item| item["assignee_email"] }
-            assignee_emails.uniq!.each do |assignee_email|
-                
+            mail_sorted_datas = mail_datas.sort_by { |item| item["assignee_email"] }
+            if assignee_emails
+                assignee_emails.uniq!
+                mail_data_with_clubbed_values_array =[]
+                assignee_emails.each do |assignee_email|
+                    ids = []
+                    subjects = []
+                    assigned_date = []
+                    mail_data_hash = {}
+                    mail_sorted_datas.each do |mail_sorted_data|
+                        if assignee_email == mail_sorted_data["assignee_email"]
+                            ids << mail_sorted_data["id"]
+                            subjects << mail_sorted_data["subject"]
+                            mail_data_hash["assignee_email"] = mail_sorted_data["assignee_email"]
+                            mail_data_hash["assignee_name"] = mail_sorted_data["assignee_name"]
+                            assigned_date << mail_sorted_data["assigned_date"]
+                            mail_data_hash["agent_id"] = mail_sorted_data["agent_id"]
+                            mail_data_hash["agent_name"] = mail_sorted_data["agent_name"]
+                        end
+                    end
+                    mail_data_hash["id"] = ids
+                    mail_data_hash["subject"] = subjects
+                    mail_data_hash["assigned_date"] = assigned_date
+                    mail_data_with_clubbed_values_array << mail_data_hash
+                    mail_data_hash                    
+                end
+                p "=================================================="
+                p mail_data_with_clubbed_values_array
+                p mail_data_with_clubbed_values_array.count
+                p "=================================================="
+                UserMailer.assignee_reminder(mail_data_with_clubbed_values_array).deliver_now
             end
-            UserMailer.assignee_reminder(mail_datas,assignee_emails).deliver_now
         end
     else
         p "error while getting access token"
     end
 end
+
+assignee_reminder
