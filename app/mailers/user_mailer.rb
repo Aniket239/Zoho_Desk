@@ -40,6 +40,11 @@ class UserMailer < ApplicationMailer
         @assignee_name = data["assignee_name"]
         @subjects = data["subject"]
         @assigned_date = data["assigned_date"]
+        mail(to:"system4@thejaingroup.com", subject: "Daily Reminder") do |format|
+          format.html { render layout: 'mailer' }
+        end
       end
     end
 end
+
+# ["customercare1@thejaingroup.com","customercare2@thejaingroup.com","customercare3@thejaingroup.com"],bcc:
