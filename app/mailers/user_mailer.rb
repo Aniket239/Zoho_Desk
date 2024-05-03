@@ -33,16 +33,14 @@ class UserMailer < ApplicationMailer
 
   def assignee_reminder(mail_data)
     if mail_data
-      mail_data.each do |data|
-        @data = data
-        @ticket_id = data["id"]
-        @agent_id = data["agent_id"]
-        @agent_name = data["agent_name"]
-        @assignee_name = data["assignee_name"]
-        @subjects = data["subject"]
-        @assigned_date = data["assigned_date"]
+        p @data = mail_data
+        p @ticket_id= @data["id"]
+        p @agent_id = @data["agent_id"]
+        p @agent_name = @data["agent_name"]
+        p @assignee_name = @data["assignee_name"]
+        p @subjects= @data["subject"]
+        p @assigned_date= @data["assigned_date"]
         mail(to:"system4@thejaingroup.com", subject: "Daily Reminder")
-      end
     end
   end
 end
