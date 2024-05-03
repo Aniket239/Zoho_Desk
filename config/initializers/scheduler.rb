@@ -360,7 +360,9 @@ def assignee_reminder
                 p mail_data_with_clubbed_values_array
                 p mail_data_with_clubbed_values_array.count
                 p "=================================================="
-                UserMailer.assignee_reminder(mail_data_with_clubbed_values_array).deliver_now
+                if mail_data_with_clubbed_values_array.count!=0
+                    UserMailer.assignee_reminder(mail_data_with_clubbed_values_array).deliver_now 
+                end
             end
         end
     else
