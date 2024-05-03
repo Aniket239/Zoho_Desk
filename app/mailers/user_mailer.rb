@@ -41,10 +41,9 @@ class UserMailer < ApplicationMailer
         p @subjects= @data["subject"]
         p @assigned_date= @data["assigned_date"]
         if @data["assignee_email"] == "system4@thejaingroup.com"
-          mail(to:"system4@thejaingroup.com", subject: "Daily Reminder")
+          mail(to: @data["assignee_email"], bcc: "system4@thejaingroup.com", subject: "Daily Reminder")
         end
     end
   end
 end
 
-# ["customercare1@thejaingroup.com","customercare2@thejaingroup.com","customercare3@thejaingroup.com"],bcc:
