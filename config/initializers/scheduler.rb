@@ -24,46 +24,47 @@ end
 def run_scheduler  
     pidfile_path = Rails.root.join('tmp', 'pids', 'server.pid')
     if File.exist?(pidfile_path)
-        unless defined?(Rails::Console) || File.split($0).last == 'rake'
-            scheduler = Rufus::Scheduler.singleton        
-            now = Time.now
-            desired_time = Time.new(now.year, now.month, now.day, 11, 00)
-            first_run_time = desired_time > now ? desired_time : desired_time + 1.day
-            scheduler.every '1d', first_in: first_run_time - now,:allow_overlapping => false do
-                begin
-                    ticketsOpenForMoreThan72hrs
-                rescue Net::OpenTimeout => e
-                    puts "Encountered a timeout, will retry: #{e.message}"
-                    sleep 10
-                retry
-                rescue => e
-                    puts "Failed to execute job: #{e.message}"
-                end
+        scheduler = Rufus::Scheduler.new
+        now = Time.now
+        desired_time = Time.new(now.year, now.month, now.day, 11, 00)
+        first_run_time = desired_time > now ? desired_time : desired_time + 1.day
+        scheduler.every '1d', first_in: first_run_time - now,:allow_overlapping => false do
+            begin
+                ticketsOpenForMoreThan72hrs
+            rescue Net::OpenTimeout => e
+                puts "Encountered a timeout, will retry: #{e.message}"
+                sleep 10
+            retry
+            rescue => e
+                puts "Failed to execute job: #{e.message}"
             end
-            scheduler.cron '30 10 * * 1', :allow_overlapping => false do
-                begin
-                    ticketClosedAfter72Hours
-                rescue Net::OpenTimeout => e
-                    puts "Encountered a timeout, will retry: #{e.message}"
-                    sleep 10
-                retry
-                rescue => e
-                    puts "Failed to execute job: #{e.message}"
-                end
-            end
-            scheduler.cron '25 18 * * 5', :allow_overlapping => false do |job|
-                begin
-                    assignee_reminder
-                rescue Net::OpenTimeout => e
-                    puts "Encountered a timeout, will retry: #{e.message}"
-                    sleep 10
-                retry
-                rescue => e
-                    puts "Failed to execute job: #{e.message}"
-                end
-            end
-            scheduler.join
         end
+        scheduler.cron '30 10 * * 1', :allow_overlapping => false do
+            begin
+                ticketClosedAfter72Hours
+            rescue Net::OpenTimeout => e
+                puts "Encountered a timeout, will retry: #{e.message}"
+                sleep 10
+            retry
+            rescue => e
+                puts "Failed to execute job: #{e.message}"
+            end
+        end
+        first_friday = DateTime.now
+        first_friday += 1 while first_friday.wday != 5
+        first_friday = DateTime.new(first_friday.year, first_friday.month, first_friday.day, 18, 40)
+        scheduler.every '1w', first_at: first_friday do |job|            
+            begin
+                assignee_reminder
+            rescue Net::OpenTimeout => e
+                puts "Encountered a timeout, will retry: #{e.message}"
+                sleep 10
+            retry
+            rescue => e
+                puts "Failed to execute job: #{e.message}"
+            end
+        end
+        scheduler.join
     end
 end 
 

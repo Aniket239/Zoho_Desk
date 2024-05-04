@@ -17,6 +17,9 @@ gem 'coffee-rails', '~> 4.1.0'
 gem 'execjs'
 gem 'mail'
 gem 'rufus-scheduler'
+gem 'sidekiq'
+gem 'sidekiq-cron'
+
 gem 'puma'
 gem 'listen'
 # Use jquery as the JavaScript library
