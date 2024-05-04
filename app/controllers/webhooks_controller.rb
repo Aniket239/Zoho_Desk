@@ -78,12 +78,12 @@ class WebhooksController < ApplicationController
               contents << content_parsed
             end  
             api_url = "https://desk.zoho.in/api/v1/tickets/#{ticket_id}/sendReply"
-            button_regex = /<a href="https:\/\/4e24-49-37-8-255.ngrok-free.app\/tickets\/issue[^"]*"[^>]*>\s*Issue Solved\s*<\/a>/
+            button_regex = /<a href="https:\/\/ad94-49-37-8-255.ngrok-free.app\/tickets\/issue[^"]*"[^>]*>\s*Issue Solved\s*<\/a>/
             prompt_regex = /<h3>!!!\s*Kindly click\s*if your issue has been resolved. Otherwise, the issue will remain marked as open in our system.\s*!!!<\/h3>/i
             cleaned_content = contents[0].to_s.gsub(button_regex, '').gsub(prompt_regex, '')
             if note
               content = <<~HTML
-              <h3>!!! Kindly click <a href="https://4e24-49-37-8-255.ngrok-free.app/tickets/issue?ticketId=#{ticket_id}&agent_id=#{agent_id}&assignee_name=#{recipient_name}" style="background-color: #4CAF50; border-radius: 5px; color: white; padding: 5px 10px 4px 10px; font-size: 14px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;">Issue Solved</a> if your issue has been resolved. Otherwise, the issue will remain marked as open in our system. !!!</h3>
+              <h3>!!! Kindly click <a href="https://ad94-49-37-8-255.ngrok-free.app/tickets/issue?ticketId=#{ticket_id}&agent_id=#{agent_id}&assignee_name=#{recipient_name}" style="background-color: #4CAF50; border-radius: 5px; color: white; padding: 5px 10px 4px 10px; font-size: 14px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;">Issue Solved</a> if your issue has been resolved. Otherwise, the issue will remain marked as open in our system. !!!</h3>
               <p>Note: #{note.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '')}</p>
               <hr>
               <p style="margin: 0; padding: 0;">============ Forwarded Message ============</p>
@@ -94,7 +94,7 @@ class WebhooksController < ApplicationController
               HTML
             else
               content = <<~HTML
-              <h3>!!! Kindly click <a href="https://4e24-49-37-8-255.ngrok-free.app/tickets/issue?ticketId=#{ticket_id}&agent_id=#{agent_id}&assignee_name=#{recipient_name}" style="background-color: #4CAF50; border-radius: 5px; color: white; padding: 5px 10px 4px 10px; font-size: 14px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;">Issue Solved</a> if your issue has been resolved. Otherwise, the issue will remain marked as open in our system. !!!</h3>
+              <h3>!!! Kindly click <a href="https://ad94-49-37-8-255.ngrok-free.app/tickets/issue?ticketId=#{ticket_id}&agent_id=#{agent_id}&assignee_name=#{recipient_name}" style="background-color: #4CAF50; border-radius: 5px; color: white; padding: 5px 10px 4px 10px; font-size: 14px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;">Issue Solved</a> if your issue has been resolved. Otherwise, the issue will remain marked as open in our system. !!!</h3>
               <hr>
               <p style="margin: 0; padding: 0;">============ Forwarded Message ============</p>
               <p style="margin: 0; padding: 0;">From: #{from}</p>
