@@ -39,7 +39,7 @@ def run_scheduler
                 puts "Failed to execute job: #{e.message}"
             end
         end
-        scheduler.cron '30 10 * * 1', :allow_overlapping => false do
+        scheduler.cron '0 5 * * 1', :allow_overlapping => false do
             begin
                 ticketClosedAfter72Hours
             rescue Net::OpenTimeout => e
@@ -50,10 +50,7 @@ def run_scheduler
                 puts "Failed to execute job: #{e.message}"
             end
         end
-        first_friday = DateTime.now
-        first_friday += 1 while first_friday.wday != 5
-        first_friday = DateTime.new(first_friday.year, first_friday.month, first_friday.day, 18, 40)
-        scheduler.every '1w', first_at: first_friday do |job|            
+        scheduler.cron '30 5 * * 1', :allow_overlapping => false do            
             begin
                 assignee_reminder
             rescue Net::OpenTimeout => e
