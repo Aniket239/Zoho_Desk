@@ -25,10 +25,7 @@ def run_scheduler
     pidfile_path = Rails.root.join('tmp', 'pids', 'server.pid')
     if File.exist?(pidfile_path)
         scheduler = Rufus::Scheduler.new
-        now = Time.now
-        desired_time = Time.new(now.year, now.month, now.day, 11, 00)
-        first_run_time = desired_time > now ? desired_time : desired_time + 1.day
-        scheduler.every '1d', first_in: first_run_time - now,:allow_overlapping => false do
+        scheduler.cron '30 4 * * *', :allow_overlapping => false do            
             begin
                 ticketsOpenForMoreThan72hrs
             rescue Net::OpenTimeout => e
@@ -50,7 +47,7 @@ def run_scheduler
                 puts "Failed to execute job: #{e.message}"
             end
         end
-        scheduler.cron '30 5 * * 1', :allow_overlapping => false do            
+        scheduler.cron '30 5 * * *', :allow_overlapping => false do            
             begin
                 assignee_reminder
             rescue Net::OpenTimeout => e
