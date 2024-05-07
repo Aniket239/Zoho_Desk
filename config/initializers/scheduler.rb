@@ -372,5 +372,3 @@ def assignee_reminder
         p "error while getting access token"
     end
 end
-
-assignee_reminder
