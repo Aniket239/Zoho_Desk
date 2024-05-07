@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Reminder</title>
 </head>
 <body style="font-family: Arial, sans-serif; color: #333;">
     <h3>This is a reminder that the customer's issue sent to you by <%= @data["agent_name"] %> via email remains unresolved in our system. We urge you to address this matter promptly.</h3>
@@ -13,7 +13,7 @@
             <p style="font-weight: bold;">Subject: <%= @subjects[index]%></p>
             <p>Assigned On: <%= DateTime.parse(@assigned_date[index]).new_offset("+05:30").strftime("%B %d, %Y %I:%M %p") %></p>
             <p>If the issue has been resolved but not yet marked as such, please use the button below to update the status.</p>
-            <a href="https://a1a3-49-37-8-255.ngrok-free.app/tickets/issue?ticketId=<%= id %>&agent_id=<%= @agent_id %>&assignee_name=<%= @assignee_name %>" style="display: inline-block; padding: 8px 15px 9px 15px; background-color: #34a238; color: white; text-decoration: none; border-radius: 5px;">Issue Solved</a>
+            <a href="https://447c-49-37-8-255.ngrok-free.app/tickets/issue?ticketId=<%= id %>&agent_id=<%= @agent_id %>&assignee_name=<%= @assignee_name %>" style="display: inline-block; padding: 8px 15px 9px 15px; background-color: #34a238; color: white; text-decoration: none; border-radius: 5px;">Issue Solved</a>
         </div>
         <% end %>
     </div>
