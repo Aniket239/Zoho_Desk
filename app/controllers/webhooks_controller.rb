@@ -78,12 +78,12 @@ class WebhooksController < ApplicationController
               contents << content_parsed
             end  
             api_url = "https://desk.zoho.in/api/v1/tickets/#{ticket_id}/sendReply"
-            button_regex = /<a href="https:\/\/447c-49-37-8-255.ngrok-free.app\/tickets\/issue[^"]*"[^>]*>\s*Issue Solved\s*<\/a>/
+            button_regex = /<a href="https:\/\/3b74-49-37-8-255.ngrok-free.app\/tickets\/issue[^"]*"[^>]*>\s*Issue Solved\s*<\/a>/
             prompt_regex = /<h3>!!!\s*Kindly click\s*if your issue has been resolved. Otherwise, the issue will remain marked as open in our system.\s*!!!<\/h3>/i
             cleaned_content = contents[0].to_s.gsub(button_regex, '').gsub(prompt_regex, '')
             if note
               content = <<~HTML
-              <h3>!!! Kindly click <a href="https://447c-49-37-8-255.ngrok-free.app/tickets/issue?ticketId=#{ticket_id}&agent_id=#{agent_id}&assignee_name=#{recipient_name}" style="background-color: #4CAF50; border-radius: 5px; color: white; padding: 5px 10px 4px 10px; font-size: 14px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;">Issue Solved</a> if your issue has been resolved. Otherwise, the issue will remain marked as open in our system. !!!</h3>
+              <h3>!!! Kindly click <a href="https://3b74-49-37-8-255.ngrok-free.app/tickets/issue?ticketId=#{ticket_id}&agent_id=#{agent_id}&assignee_name=#{recipient_name}" style="background-color: #4CAF50; border-radius: 5px; color: white; padding: 5px 10px 4px 10px; font-size: 14px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;">Issue Solved</a> if your issue has been resolved. Otherwise, the issue will remain marked as open in our system. !!!</h3>
               <p>Note: #{note.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '')}</p>
               <hr>
               <p style="margin: 0; padding: 0;">============ Forwarded Message ============</p>
@@ -94,7 +94,7 @@ class WebhooksController < ApplicationController
               HTML
             else
               content = <<~HTML
-              <h3>!!! Kindly click <a href="https://447c-49-37-8-255.ngrok-free.app/tickets/issue?ticketId=#{ticket_id}&agent_id=#{agent_id}&assignee_name=#{recipient_name}" style="background-color: #4CAF50; border-radius: 5px; color: white; padding: 5px 10px 4px 10px; font-size: 14px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;">Issue Solved</a> if your issue has been resolved. Otherwise, the issue will remain marked as open in our system. !!!</h3>
+              <h3>!!! Kindly click <a href="https://3b74-49-37-8-255.ngrok-free.app/tickets/issue?ticketId=#{ticket_id}&agent_id=#{agent_id}&assignee_name=#{recipient_name}" style="background-color: #4CAF50; border-radius: 5px; color: white; padding: 5px 10px 4px 10px; font-size: 14px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;">Issue Solved</a> if your issue has been resolved. Otherwise, the issue will remain marked as open in our system. !!!</h3>
               <hr>
               <p style="margin: 0; padding: 0;">============ Forwarded Message ============</p>
               <p style="margin: 0; padding: 0;">From: #{from}</p>
@@ -157,29 +157,3 @@ class WebhooksController < ApplicationController
       head :ok
     end
   end
-
-
-  # threads_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-  #         contents = []
-  #         threads_response["data"].each do |thread|
-  #           thread_id = thread["id"]
-  #           content_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads/#{thread_id}/originalContent", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
-  #           # customer_email = content_response.parsed_response["contact"]["email"]
-  #           content = content_response.parsed_response["content"]
-  #           mail = Mail.read_from_string(content)
-  #           if mail.multipart?
-  #             html_part = mail.html_part
-  #             text_part = mail.text_part
-  #             content_parsed =  if html_part
-  #                                 html_part.decoded
-  #                               elsif text_part
-  #                                 text_part.decoded
-  #                               else
-  #                                 mail.parts.first.decoded
-  #                               end
-  #           else
-  #             content_parsed = mail.body.decoded
-  #           end
-  #           contents << content_parsed
-  #         end
-  #           UserMailer.zohoMail(contents[0],subject,recipient_email,agent_name,note,assigneer_email,cc,ticket_id).deliver_now if recipient_email 
