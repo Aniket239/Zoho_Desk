@@ -25,7 +25,7 @@ def run_scheduler
     pidfile_path = Rails.root.join('tmp', 'pids', 'server.pid')
     if File.exist?(pidfile_path)
         scheduler = Rufus::Scheduler.new
-        scheduler.cron '30 4 * * *', :allow_overlapping => false do            
+        scheduler.cron '50 4 * * *', :allow_overlapping => false do            
             begin
                 ticketsOpenForMoreThan72hrs
             rescue Net::OpenTimeout => e
