@@ -156,4 +156,21 @@ class WebhooksController < ApplicationController
       end
       head :ok
     end
+
+    def call
+      request_data = params
+      if request_data.dig('_json', 0, 'eventType') == 'Ticket_Update' && request_data.dig('_json', 0)['payload'].dig('customFields', 'Call Customer') == "true"
+        ticket_update_event = request_data.dig('_json', 0)
+        refresh_token='1000.4ba1d6b204ab1c7ecc7d90428b9eda3e.5e14e172761ec699949d20447711e9db'
+        p "======================================================================="
+        p payload = ticket_update_event['payload'] || {}
+        p ticket_number = payload['ticketNumber']
+        p ticket_id = payload['id']
+        p ticket_status = payload['status']
+        p subject = payload['subject']
+        p agent_name = payload.dig('assignee', 'firstName')
+        p customer_number = payload.dig('contact', 'phone')
+      end
+      head :ok
+    end
   end
