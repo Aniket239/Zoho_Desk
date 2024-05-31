@@ -3,11 +3,25 @@ class WebhooksController < ApplicationController
     require 'mail'
     require 'uri'
 
+    def access_token
+      response = HTTParty.post("https://accounts.zoho.in/oauth/v2/token", body: {
+        refresh_token: '1000.4ba1d6b204ab1c7ecc7d90428b9eda3e.5e14e172761ec699949d20447711e9db',
+        client_id: '1000.AX7K22BZK6OS35PYCBPO990IEX8ZPC',
+        client_secret: '69f04bf294dee8d3a69c77367163af960c83814985',
+        grant_type: 'refresh_token'
+      })
+      if response.code == 200 
+        return access_token = response.parsed_response['access_token']
+      else
+        p "Failed to refresh token"
+      end
+      
+    end
+
     def assignTo
       request_data = params
       if request_data.dig('_json', 0, 'eventType') == 'Ticket_Update'
         ticket_update_event = request_data.dig('_json', 0)
-        refresh_token='1000.4ba1d6b204ab1c7ecc7d90428b9eda3e.5e14e172761ec699949d20447711e9db'
         payload = ticket_update_event['payload'] || {}
         ticket_number = payload['ticketNumber']
         ticket_id = payload['id']
@@ -30,22 +44,12 @@ class WebhooksController < ApplicationController
           cc_email=nil
         end
         agent_name = "Mail From"+ ' '+ payload.dig('assignee', 'firstName').to_s + ' ' + payload.dig('assignee', 'lastName').to_s 
-        client_id = '1000.AX7K22BZK6OS35PYCBPO990IEX8ZPC'
-        client_secret = '69f04bf294dee8d3a69c77367163af960c83814985'
-        token_url = "https://accounts.zoho.in/oauth/v2/token"
-        response = HTTParty.post(token_url, body: {
-          refresh_token: refresh_token,
-          client_id: client_id,
-          client_secret: client_secret,
-          grant_type: 'refresh_token'
-        })
   
-        if response.code == 200 && recipient_email
+        if recipient_email
           p "Recipient email: #{recipient_email}"
           customer_care_emails = ["customercare1@thejaingroup.com", "customercare2@thejaingroup.com", "customercare3@thejaingroup.com"]
           normalized_email = recipient_email.strip.downcase
           unless customer_care_emails.include?(normalized_email)
-            access_token = response.parsed_response['access_token']
             threads_response = HTTParty.get("https://desk.zoho.in/api/v1/tickets/#{ticket_id}/threads", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" })
             contents = []
             attachment_ids = []
@@ -149,7 +153,7 @@ class WebhooksController < ApplicationController
             end            
           end
         else
-          p "Failed to refresh token"
+          p "Failed to retrieve recipient email"
         end
       else
         p "Received a non-ticket update event"
@@ -170,6 +174,38 @@ class WebhooksController < ApplicationController
         p subject = payload['subject']
         p agent_name = payload.dig('assignee', 'firstName')
         p customer_number = payload.dig('contact', 'phone')
+        p "======================================================================="
+        if agent_name == "PALLABITA"
+          agent_number = ""
+        end
+        call_response = HTTParty.post("https://kpi.knowlarity.com/Basic/v1/account/call/makecall",
+          headers: {
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+            'Authorization' => 'dff4b494-13d3-4c18-b907-9a830de783ef',
+            'x-api-key' => 'LnUmJ62yqp31VLKYR4YlfrYtYOKNIC59viqOXh8g'
+          },
+          body: {
+            "k_number": "+919681411411",
+            "agent_number": "+918420541541",
+            "customer_number": customer_number,
+            "caller_id": "+918045239626"
+          }.to_json
+        )
+        if call_response.code == 200
+          p call_response
+          ticket_update_response = HTTParty.put("https://desk.zoho.in/api/v1/tickets/#{ticket_id}",
+          headers: {'Authorization' => "Zoho-oauthtoken #{access_token}",'Content-Type' => 'application/json'},
+          body: {
+            "customFields" => {
+              "Call Customer"=>"false"
+            }
+          }.to_json)
+        else
+          p "error while calling"
+        end
+      else
+        p "Recieved a non-ticket update event"
       end
       head :ok
     end
