@@ -4,6 +4,8 @@ Rails.application.routes.draw do
 
   post '/webhook/assignTo', to: 'webhooks#assignTo'
   post '/webhook/call', to: 'webhooks#call'
+  post '/webhook/ongoing_call', to: 'webhooks#ongoing_call'
+
 
   root 'tickets#login'
   post 'tickets/login'

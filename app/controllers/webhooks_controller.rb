@@ -176,7 +176,11 @@ class WebhooksController < ApplicationController
         p customer_number = payload.dig('contact', 'phone')
         p "======================================================================="
         if agent_name == "PALLABITA"
-          agent_number = ""
+          agent_number = "+918420541541"
+        elsif agent_name == "Rimi"
+          agent_number = "+9170441113333"
+        else 
+          agent_number = "+919007576657"
         end
         call_response = HTTParty.post("https://kpi.knowlarity.com/Basic/v1/account/call/makecall",
           headers: {
@@ -186,8 +190,8 @@ class WebhooksController < ApplicationController
             'x-api-key' => 'LnUmJ62yqp31VLKYR4YlfrYtYOKNIC59viqOXh8g'
           },
           body: {
-            "k_number": "+919681411411",
-            "agent_number": "+918420541541",
+            "k_number": "+919513436775",
+            "agent_number": agent_number,
             "customer_number": customer_number,
             "caller_id": "+918045239626"
           }.to_json
@@ -207,6 +211,11 @@ class WebhooksController < ApplicationController
       else
         p "Recieved a non-ticket update event"
       end
+      head :ok
+    end
+
+    def ongoing_call
+      request_data = params
       head :ok
     end
   end
