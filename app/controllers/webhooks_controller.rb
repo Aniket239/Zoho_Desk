@@ -3,9 +3,12 @@ class WebhooksController < ApplicationController
     require 'mail'
     require 'uri'
 
+    @agent_id
+    @department_id
+
     def access_token
       response = HTTParty.post("https://accounts.zoho.in/oauth/v2/token", body: {
-        refresh_token: '1000.4ba1d6b204ab1c7ecc7d90428b9eda3e.5e14e172761ec699949d20447711e9db',
+        refresh_token: '1000.28e35ea929c9a136b82cf9d48603e17d.b47ffa18bb065b9026c033fadd38e745',
         client_id: '1000.AX7K22BZK6OS35PYCBPO990IEX8ZPC',
         client_secret: '69f04bf294dee8d3a69c77367163af960c83814985',
         grant_type: 'refresh_token'
@@ -163,22 +166,25 @@ class WebhooksController < ApplicationController
 
     def call
       request_data = params
-      if request_data.dig('_json', 0, 'eventType') == 'Ticket_Update' && request_data.dig('_json', 0)['payload'].dig('customFields', 'Call Customer') == "true"
+      if request_data.dig('_json', 0, 'eventType') == 'Ticket_Update' && request_data.dig('_json', 0)['payload'].dig('customFields', 'Call Customer') == "true" && request_data.dig('_json', 0)['payload'].dig('customFields', 'CC Rishi Jain') == "false"
         ticket_update_event = request_data.dig('_json', 0)
-        refresh_token='1000.4ba1d6b204ab1c7ecc7d90428b9eda3e.5e14e172761ec699949d20447711e9db'
         p "======================================================================="
         p payload = ticket_update_event['payload'] || {}
         p ticket_number = payload['ticketNumber']
         p ticket_id = payload['id']
         p ticket_status = payload['status']
         p subject = payload['subject']
+        p agent_id = payload.dig('assignee', 'id')
         p agent_name = payload.dig('assignee', 'firstName')
+        Rails.cache.write(:agent_id, payload.dig('assignee', 'id'))
+        Rails.cache.write(:department_id, payload['departmentId'])
+        p @department_id = payload['departmentId']
         p customer_number = payload.dig('contact', 'phone')
         p "======================================================================="
         if agent_name == "PALLABITA"
           agent_number = "+918420541541"
         elsif agent_name == "Rimi"
-          agent_number = "+9170441113333"
+          agent_number = "+917044111333"
         else 
           agent_number = "+919007576657"
         end
@@ -211,11 +217,147 @@ class WebhooksController < ApplicationController
       else
         p "Recieved a non-ticket update event"
       end
+
+      if request_data.dig('_json', 0, 'eventType') == 'Ticket_Update' && request_data.dig('_json', 0)['payload'].dig('customFields', 'Call Customer') == "true" && request_data.dig('_json', 0)['payload'].dig('customFields', 'CC Rishi Jain') == "true"
+        ticket_update_event = request_data.dig('_json', 0)
+        p "======================================================================="
+        p payload = ticket_update_event['payload'] || {}
+        p ticket_number = payload['ticketNumber']
+        p ticket_id = payload['id']
+        p ticket_status = payload['status']
+        p subject = payload['subject']
+        p agent_id = payload.dig('assignee', 'id')
+        p agent_name = payload.dig('assignee', 'firstName')
+        Rails.cache.write(:agent_id, payload.dig('assignee', 'id'))
+        Rails.cache.write(:department_id, payload['departmentId'])
+        p @department_id = payload['departmentId']
+        p customer_number = payload.dig('contact', 'phone')
+        p "======================================================================="
+        if agent_name == "PALLABITA"
+          agent_number = "+916295945754"
+        elsif agent_name == "Rimi"
+          agent_number = "+916295945754"
+        else 
+          agent_number = "+916295945754"
+        end
+        call_response = HTTParty.post("https://kpi.knowlarity.com/Basic/v1/account/call/makecall",
+          headers: {
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+            'Authorization' => 'dff4b494-13d3-4c18-b907-9a830de783ef',
+            'x-api-key' => 'LnUmJ62yqp31VLKYR4YlfrYtYOKNIC59viqOXh8g'
+          },
+          body: {
+            "k_number": "+919513436775",
+            "agent_number": agent_number,
+            "customer_number": customer_number,
+            "caller_id": "+918045239626"
+          }.to_json
+        )
+        if call_response.code == 200
+          p call_response
+          ticket_update_response = HTTParty.put("https://desk.zoho.in/api/v1/tickets/#{ticket_id}",
+          headers: {'Authorization' => "Zoho-oauthtoken #{access_token}",'Content-Type' => 'application/json'},
+          body: {
+            "customFields" => {
+              "Call Customer"=>"false",
+              "CC Rishi Jain" => "false"
+            }
+          }.to_json)
+        else
+          p "error while calling"
+        end
+      else
+        p "Recieved a non-ticket update event"
+      end
+
+      # "============================================= contact call customer button =========================================================="
+
+      if request_data.dig('_json', 0, 'eventType') == 'Contact_Update' && request_data.dig('_json', 0)['payload'].dig('cf', 'cf_call_customer') == "true"
+        p "======================================================================="
+        ticket_update_event = request_data.dig('_json', 0)
+        p payload = ticket_update_event['payload'] || {}
+        p contact_id = payload['id']
+        p agent_id = payload['ownerId']
+        p customer_number = payload['phone']
+        Rails.cache.write(:agent_id, agent_id)
+        # Rails.cache.write(:department_id, payload['departmentId'])
+        p "======================================================================="
+        if agent_id == "142173000000064001"
+          p agent_number = "+918420541541"
+        elsif agent_id == "142173000000191144"
+          p agent_number = "+917044111333"
+        elsif agent_id == "142173000000233350" 
+          p agent_number = "+919007576657"
+        end
+        contact_update_response = HTTParty.put("https://desk.zoho.in/api/v1/contacts/#{contact_id}",
+        headers: {'Authorization' => "Zoho-oauthtoken #{access_token}",'Content-Type' => 'application/json'},
+        body: {
+          "cf" => {
+            "cf_call_customer"=>"false"
+            }
+        }.to_json)
+        if contact_update_response.code == 200
+          p  contact_update_response
+        end
+        call_response = HTTParty.post("https://kpi.knowlarity.com/Basic/v1/account/call/makecall",
+          headers: {
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+            'Authorization' => 'dff4b494-13d3-4c18-b907-9a830de783ef',
+            'x-api-key' => 'LnUmJ62yqp31VLKYR4YlfrYtYOKNIC59viqOXh8g'
+          },
+          body: {
+            "k_number": "+919513436775",
+            "agent_number": agent_number,
+            "customer_number": customer_number,
+            "caller_id": "+918045239626"
+          }.to_json
+        )
+        if call_response.code == 200
+          p call_response
+        else
+          p "error while calling"
+        end
+      else
+        p "Recieved a non-ticket update event"
+      end
       head :ok
     end
 
     def ongoing_call
-      request_data = params
+      p request_data = params
+      if request_data.dig('_json', 0, 'eventType') == 'Call_Add'
+        p "======================================================================="
+        p payload = request_data.dig('_json', 0)['payload'] || {}
+        p agent_id = Rails.cache.read(:agent_id)
+        p department_id = Rails.cache.read(:department_id)
+        p call_id = payload['id']
+        p "=================================== get call ===================================="
+        call_response = HTTParty.get("https://desk.zoho.in/api/v1/calls/#{call_id}?include=contacts,assignee", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'})
+        p call_response.parsed_response
+        p "=================================== update owner of call ===================================="
+        call_update_response = HTTParty.put("https://desk.zoho.in/api/v1/calls/#{call_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'},
+        body: {
+          "ownerId" => agent_id,
+          "departmentId" => department_id
+        }.to_json) 
+        p call_update_response.parsed_response
+        p "======================================================================="
+      end
+      # if request_data.dig('_json', 0, 'eventType') == 'Call_Update'
+      #   p payload = request_data.dig('_json', 0)['payload'] || {}
+      #   p agent_id = payload['ownerId']
+      #   p call_id = payload['id']
+      #   p "======================================= update department of call ================================"
+      #   call_update_response = HTTParty.put("https://desk.zoho.in/api/v1/calls/#{call_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'},
+      #   body: {
+      #     "departmentId" => "142173000000010772"
+      #   }.to_json) 
+      #   p call_update_response.parsed_response
+      #   p "======================================================================="
+      # end
+      
       head :ok
     end
   end

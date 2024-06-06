@@ -38,12 +38,19 @@ class AuthController < ApplicationController
         'Desk.articles.READ',
         'Desk.articles.CREATE',
         'Desk.articles.UPDATE',
-        'Desk.articles.DELETE'
+        'Desk.articles.DELETE',
+        'Desk.activities.calls.READ',
+        'Desk.activities.READ',
+        'Desk.activities.calls.UPDATE',
+        'Desk.activities.UPDATE',
+        'Desk.activities.calls.DELETE',
+        'Desk.activities.DELETE',
+        'Desk.activities.calls.CREATE', 
+        'Desk.activities.CREATE'
     ]
     scope = scopes.join(',')
     response_type = 'code'
     authorization_url = "https://accounts.zoho.com/oauth/v2/auth?response_type=#{response_type}&client_id=#{client_id}&scope=#{scope}&redirect_uri=#{redirect_uri}&access_type=offline&prompt=consent"
-
     redirect_to authorization_url
   end
 
