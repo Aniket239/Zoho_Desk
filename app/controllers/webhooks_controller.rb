@@ -85,12 +85,12 @@ class WebhooksController < ApplicationController
               contents << content_parsed
             end  
             api_url = "https://desk.zoho.in/api/v1/tickets/#{ticket_id}/sendReply"
-            button_regex = /<a href="https:\/\/bc20-49-37-8-255.ngrok-free.app\/tickets\/issue[^"]*"[^>]*>\s*Issue Solved\s*<\/a>/
+            button_regex = /<a href="https:\/\/5e24-49-37-8-195.ngrok-free.app\/tickets\/issue[^"]*"[^>]*>\s*Issue Solved\s*<\/a>/
             prompt_regex = /<h3>!!!\s*Kindly click\s*if your issue has been resolved. Otherwise, the issue will remain marked as open in our system.\s*!!!<\/h3>/i
             cleaned_content = contents[0].to_s.gsub(button_regex, '').gsub(prompt_regex, '')
             if note
               content = <<~HTML
-              <h3>!!! Kindly click <a href="https://bc20-49-37-8-255.ngrok-free.app/tickets/issue?ticketId=#{ticket_id}&agent_id=#{agent_id}&assignee_name=#{recipient_name}" style="background-color: #4CAF50; border-radius: 5px; color: white; padding: 5px 10px 4px 10px; font-size: 14px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;">Issue Solved</a> if your issue has been resolved. Otherwise, the issue will remain marked as open in our system. !!!</h3>
+              <h3>!!! Kindly click <a href="https://5e24-49-37-8-195.ngrok-free.app/tickets/issue?ticketId=#{ticket_id}&agent_id=#{agent_id}&assignee_name=#{recipient_name}" style="background-color: #4CAF50; border-radius: 5px; color: white; padding: 5px 10px 4px 10px; font-size: 14px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;">Issue Solved</a> if your issue has been resolved. Otherwise, the issue will remain marked as open in our system. !!!</h3>
               <p>Note: #{note.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '')}</p>
               <hr>
               <p style="margin: 0; padding: 0;">============ Forwarded Message ============</p>
@@ -101,7 +101,7 @@ class WebhooksController < ApplicationController
               HTML
             else
               content = <<~HTML
-              <h3>!!! Kindly click <a href="https://bc20-49-37-8-255.ngrok-free.app/tickets/issue?ticketId=#{ticket_id}&agent_id=#{agent_id}&assignee_name=#{recipient_name}" style="background-color: #4CAF50; border-radius: 5px; color: white; padding: 5px 10px 4px 10px; font-size: 14px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;">Issue Solved</a> if your issue has been resolved. Otherwise, the issue will remain marked as open in our system. !!!</h3>
+              <h3>!!! Kindly click <a href="https://5e24-49-37-8-195.ngrok-free.app/tickets/issue?ticketId=#{ticket_id}&agent_id=#{agent_id}&assignee_name=#{recipient_name}" style="background-color: #4CAF50; border-radius: 5px; color: white; padding: 5px 10px 4px 10px; font-size: 14px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;">Issue Solved</a> if your issue has been resolved. Otherwise, the issue will remain marked as open in our system. !!!</h3>
               <hr>
               <p style="margin: 0; padding: 0;">============ Forwarded Message ============</p>
               <p style="margin: 0; padding: 0;">From: #{from}</p>
@@ -179,7 +179,16 @@ class WebhooksController < ApplicationController
         Rails.cache.write(:agent_id, payload.dig('assignee', 'id'))
         Rails.cache.write(:department_id, payload['departmentId'])
         p @department_id = payload['departmentId']
-        p customer_number = payload.dig('contact', 'phone')
+        customer_number = payload.dig('contact', 'phone')
+        customer_number = customer_number.gsub(/\s+/, "")  # Remove extra spaces
+        puts "Original Phone Number: #{customer_number}"
+        if customer_number.match?(/^(\+|)91/)
+          puts "Phone number already starts with +91"
+        else
+          customer_number = "+91#{customer_number}"
+          puts "Formatted Phone Number: #{customer_number}"
+        end
+
         p "======================================================================="
         if agent_name == "PALLABITA"
           agent_number = "+918420541541"
@@ -218,60 +227,7 @@ class WebhooksController < ApplicationController
         p "Recieved a non-ticket update event"
       end
 
-      if request_data.dig('_json', 0, 'eventType') == 'Ticket_Update' && request_data.dig('_json', 0)['payload'].dig('customFields', 'Call Customer') == "true" && request_data.dig('_json', 0)['payload'].dig('customFields', 'CC Rishi Jain') == "true"
-        ticket_update_event = request_data.dig('_json', 0)
-        p "======================================================================="
-        p payload = ticket_update_event['payload'] || {}
-        p ticket_number = payload['ticketNumber']
-        p ticket_id = payload['id']
-        p ticket_status = payload['status']
-        p subject = payload['subject']
-        p agent_id = payload.dig('assignee', 'id')
-        p agent_name = payload.dig('assignee', 'firstName')
-        Rails.cache.write(:agent_id, payload.dig('assignee', 'id'))
-        Rails.cache.write(:department_id, payload['departmentId'])
-        p @department_id = payload['departmentId']
-        p customer_number = payload.dig('contact', 'phone')
-        p "======================================================================="
-        if agent_name == "PALLABITA"
-          agent_number = "+916295945754"
-        elsif agent_name == "Rimi"
-          agent_number = "+916295945754"
-        else 
-          agent_number = "+916295945754"
-        end
-        call_response = HTTParty.post("https://kpi.knowlarity.com/Basic/v1/account/call/makecall",
-          headers: {
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json',
-            'Authorization' => 'dff4b494-13d3-4c18-b907-9a830de783ef',
-            'x-api-key' => 'LnUmJ62yqp31VLKYR4YlfrYtYOKNIC59viqOXh8g'
-          },
-          body: {
-            "k_number": "+919513436775",
-            "agent_number": agent_number,
-            "customer_number": customer_number,
-            "caller_id": "+918045239626"
-          }.to_json
-        )
-        if call_response.code == 200
-          p call_response
-          ticket_update_response = HTTParty.put("https://desk.zoho.in/api/v1/tickets/#{ticket_id}",
-          headers: {'Authorization' => "Zoho-oauthtoken #{access_token}",'Content-Type' => 'application/json'},
-          body: {
-            "customFields" => {
-              "Call Customer"=>"false",
-              "CC Rishi Jain" => "false"
-            }
-          }.to_json)
-        else
-          p "error while calling"
-        end
-      else
-        p "Recieved a non-ticket update event"
-      end
-
-      # "============================================= contact call customer button =========================================================="
+      # "============================================= customer contact call button =========================================================="
 
       if request_data.dig('_json', 0, 'eventType') == 'Contact_Update' && request_data.dig('_json', 0)['payload'].dig('cf', 'cf_call_customer') == "true"
         p "======================================================================="
@@ -280,16 +236,40 @@ class WebhooksController < ApplicationController
         p contact_id = payload['id']
         p agent_id = payload['ownerId']
         p customer_number = payload['phone']
+        customer_number = customer_number.gsub(/\s+/, "")  # Remove extra spaces
+        puts "Original Phone Number: #{customer_number}"
+        if customer_number.match?(/^(\+|)91/)
+          puts "Phone number already starts with +91"
+        else
+          customer_number = "+91#{customer_number}"
+          puts "Formatted Phone Number: #{customer_number}"
+        end
         Rails.cache.write(:agent_id, agent_id)
-        # Rails.cache.write(:department_id, payload['departmentId'])
         p "======================================================================="
         if agent_id == "142173000000064001"
           p agent_number = "+918420541541"
+          p department_id = "142173000000210031"
+            if payload['lastName'] == "Aniket Biswas"
+              # p agent_number = "+916295945754"
+              p agent_number = "+918597663642"
+            end
+
         elsif agent_id == "142173000000191144"
+          p department_id = "142173000000010772"
           p agent_number = "+917044111333"
+          if payload['lastName'] == "Aniket Biswas"
+            # p agent_number = "+916295945754"
+            p agent_number = "+918597663642"
+          end
         elsif agent_id == "142173000000233350" 
+          p department_id = "142173000000227047"
           p agent_number = "+919007576657"
+          if payload['lastName'] == "Aniket Biswas"
+            # p agent_number = "+916295945754"
+            p agent_number = "+918597663642"
+          end
         end
+        Rails.cache.write(:department_id, department_id)
         contact_update_response = HTTParty.put("https://desk.zoho.in/api/v1/contacts/#{contact_id}",
         headers: {'Authorization' => "Zoho-oauthtoken #{access_token}",'Content-Type' => 'application/json'},
         body: {
@@ -326,38 +306,78 @@ class WebhooksController < ApplicationController
     end
 
     def ongoing_call
-      p request_data = params
+      request_data = params
       if request_data.dig('_json', 0, 'eventType') == 'Call_Add'
-        p "======================================================================="
+        p "================================ request params data ======================================="
         p payload = request_data.dig('_json', 0)['payload'] || {}
-        p agent_id = Rails.cache.read(:agent_id)
-        p department_id = Rails.cache.read(:department_id)
-        p call_id = payload['id']
-        p "=================================== get call ===================================="
-        call_response = HTTParty.get("https://desk.zoho.in/api/v1/calls/#{call_id}?include=contacts,assignee", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'})
-        p call_response.parsed_response
-        p "=================================== update owner of call ===================================="
-        call_update_response = HTTParty.put("https://desk.zoho.in/api/v1/calls/#{call_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'},
-        body: {
-          "ownerId" => agent_id,
-          "departmentId" => department_id
-        }.to_json) 
-        p call_update_response.parsed_response
-        p "======================================================================="
-      end
-      # if request_data.dig('_json', 0, 'eventType') == 'Call_Update'
+        p "Agent ID #{agent_id = Rails.cache.read(:agent_id)}"
+        p "Department ID #{department_id = Rails.cache.read(:department_id)}"
+        p "Call ID #{call_id = payload['id']}"
+        p "=================================== update owner and department of the call response ===================================="
+        max_retries = 3
+        retry_count = 0
+        retry_delay = 1 # in seconds, adjust as needed
+        begin
+          p response = HTTParty.put("https://desk.zoho.in/api/v1/calls/#{call_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'},
+                body: {
+                  "ownerId" => agent_id,
+                  "departmentId" => department_id
+            }.to_json)
+        rescue HTTParty::Error => e
+          if retry_count < max_retries
+            retry_count += 1
+            puts "Retry #{retry_count}/#{max_retries}"
+            sleep(retry_delay)
+            retry
+          else
+            puts "Max retries reached, aborting"
+            raise e
+          end
+        end
+      end     
+      # if request_data.dig('_json', 0, 'eventType') == 'Call_Update' && request_data.dig('_json', 0, 'payload')['status'] == "Completed"
+      #   p "====================================================== call completed ==================================================="
       #   p payload = request_data.dig('_json', 0)['payload'] || {}
-      #   p agent_id = payload['ownerId']
-      #   p call_id = payload['id']
-      #   p "======================================= update department of call ================================"
-      #   call_update_response = HTTParty.put("https://desk.zoho.in/api/v1/calls/#{call_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'},
-      #   body: {
-      #     "departmentId" => "142173000000010772"
-      #   }.to_json) 
-      #   p call_update_response.parsed_response
-      #   p "======================================================================="
+      #   p "Agent ID #{agent_id = Rails.cache.read(:agent_id)}"
+      #   p "Department ID #{department_id = Rails.cache.read(:department_id)}"
+      #   p "Call ID #{call_id = payload['id']}"
+      #   p call_get_response = HTTParty.get("https://desk.zoho.in/api/v1/calls/#{call_id}?include=livecalls", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'})
+      #   if call_get_response.code == 200
+      #     p recording_url = call_get_response.parsed_response['livecall']['recordings'][0]['url']
+      #     p subject = call_get_response.parsed_response['subject']
+      #     p direction = call_get_response.parsed_response['direction']
+      #     p contact_id = call_get_response.parsed_response['contactId']
+      #     p status = call_get_response.parsed_response['status']
+      #     p start_time = call_get_response.parsed_response['startTime']
+      #     p livecall_id = call_get_response.parsed_response['livecall']['id']
+      #     p duration = payload['duration']
+      #     max_retries = 3
+      #     retry_count = 0
+      #     retry_delay = 1 # in seconds, adjust as needed
+      #     begin
+      #       p call_get_response = HTTParty.post("https://desk.zoho.in/api/v1/calls", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'},
+      #       body:{
+      #       "departmentId" => department_id,
+      #       "subject" => subject,
+      #       "direction" => direction,
+      #       "status" => "Current call",
+      #       "ownerId" => agent_id,
+      #       "contactId" => contact_id,
+      #       "startTime" => start_time
+      #       }.to_json)
+      #     rescue HTTParty::Error => e
+      #       if retry_count < max_retries
+      #         retry_count += 1
+      #         puts "Retry #{retry_count}/#{max_retries}"
+      #         sleep(retry_delay)
+      #         retry
+      #       else
+      #         puts "Max retries reached, aborting"
+      #         raise e
+      #       end
+      #     end
+      #   end
       # end
-      
       head :ok
     end
   end
