@@ -46,7 +46,9 @@ class AuthController < ApplicationController
         'Desk.activities.calls.DELETE',
         'Desk.activities.DELETE',
         'Desk.activities.calls.CREATE', 
-        'Desk.activities.CREATE'
+        'Desk.activities.CREATE',
+        'Desk.InstantMessages.READ',
+        'Desk.InstantMessages.CREATE'
     ]
     scope = scopes.join(',')
     response_type = 'code'

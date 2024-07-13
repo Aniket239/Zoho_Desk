@@ -7,19 +7,32 @@ class WebhooksController < ApplicationController
     @department_id
 
     def access_token
-      response = HTTParty.post("https://accounts.zoho.in/oauth/v2/token", body: {
-        refresh_token: '1000.28e35ea929c9a136b82cf9d48603e17d.b47ffa18bb065b9026c033fadd38e745',
-        client_id: '1000.AX7K22BZK6OS35PYCBPO990IEX8ZPC',
-        client_secret: '69f04bf294dee8d3a69c77367163af960c83814985',
-        grant_type: 'refresh_token'
-      })
-      if response.code == 200 
-        return access_token = response.parsed_response['access_token']
-      else
-        p "Failed to refresh token"
+      access_token = nil
+    
+      until access_token
+        response = HTTParty.post("https://accounts.zoho.in/oauth/v2/token", body: {
+          refresh_token: '1000.ef62475c1f53d03d249acbc51d446cac.8c2d55c1e215f71701e39803e5ab0d8a',
+          client_id: '1000.AX7K22BZK6OS35PYCBPO990IEX8ZPC',
+          client_secret: '69f04bf294dee8d3a69c77367163af960c83814985',
+          grant_type: 'refresh_token'
+        })
+    
+        if response.code == 200
+          p "================================================= access token generated ========================================"
+          p response.parsed_response['access_token']
+          p "================================================= access token generated ========================================"
+          access_token = response.parsed_response['access_token']
+        else
+          p "================================================= failed access token generated ========================================"
+          p "Failed to refresh token with #{response.code}"
+          p "================================================= failed access token generated ========================================"
+          sleep(5)  # wait for 5 seconds before retrying
+        end
       end
-      
+    
+      access_token
     end
+    
 
     def assignTo
       request_data = params
@@ -85,12 +98,12 @@ class WebhooksController < ApplicationController
               contents << content_parsed
             end  
             api_url = "https://desk.zoho.in/api/v1/tickets/#{ticket_id}/sendReply"
-            button_regex = /<a href="https:\/\/c12b-49-37-8-195.ngrok-free.app\/tickets\/issue[^"]*"[^>]*>\s*Issue Solved\s*<\/a>/
+            button_regex = /<a href="https:\/\/5996-49-37-8-195.ngrok-free.app\/tickets\/issue[^"]*"[^>]*>\s*Issue Solved\s*<\/a>/
             prompt_regex = /<h3>!!!\s*Kindly click\s*if your issue has been resolved. Otherwise, the issue will remain marked as open in our system.\s*!!!<\/h3>/i
             cleaned_content = contents[0].to_s.gsub(button_regex, '').gsub(prompt_regex, '')
             if note
               content = <<~HTML
-              <h3>!!! Kindly click <a href="https://c12b-49-37-8-195.ngrok-free.app/tickets/issue?ticketId=#{ticket_id}&agent_id=#{agent_id}&assignee_name=#{recipient_name}" style="background-color: #4CAF50; border-radius: 5px; color: white; padding: 5px 10px 4px 10px; font-size: 14px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;">Issue Solved</a> if your issue has been resolved. Otherwise, the issue will remain marked as open in our system. !!!</h3>
+              <h3>!!! Kindly click <a href="https://5996-49-37-8-195.ngrok-free.app/tickets/issue?ticketId=#{ticket_id}&agent_id=#{agent_id}&assignee_name=#{recipient_name}" style="background-color: #4CAF50; border-radius: 5px; color: white; padding: 5px 10px 4px 10px; font-size: 14px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;">Issue Solved</a> if your issue has been resolved. Otherwise, the issue will remain marked as open in our system. !!!</h3>
               <p>Note: #{note.encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '')}</p>
               <hr>
               <p style="margin: 0; padding: 0;">============ Forwarded Message ============</p>
@@ -101,7 +114,7 @@ class WebhooksController < ApplicationController
               HTML
             else
               content = <<~HTML
-              <h3>!!! Kindly click <a href="https://c12b-49-37-8-195.ngrok-free.app/tickets/issue?ticketId=#{ticket_id}&agent_id=#{agent_id}&assignee_name=#{recipient_name}" style="background-color: #4CAF50; border-radius: 5px; color: white; padding: 5px 10px 4px 10px; font-size: 14px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;">Issue Solved</a> if your issue has been resolved. Otherwise, the issue will remain marked as open in our system. !!!</h3>
+              <h3>!!! Kindly click <a href="https://5996-49-37-8-195.ngrok-free.app/tickets/issue?ticketId=#{ticket_id}&agent_id=#{agent_id}&assignee_name=#{recipient_name}" style="background-color: #4CAF50; border-radius: 5px; color: white; padding: 5px 10px 4px 10px; font-size: 14px; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;">Issue Solved</a> if your issue has been resolved. Otherwise, the issue will remain marked as open in our system. !!!</h3>
               <hr>
               <p style="margin: 0; padding: 0;">============ Forwarded Message ============</p>
               <p style="margin: 0; padding: 0;">From: #{from}</p>
@@ -247,26 +260,36 @@ class WebhooksController < ApplicationController
         Rails.cache.write(:agent_id, agent_id)
         p "======================================================================="
         if agent_id == "142173000000064001"
-          p agent_number = "+918420541541"
-          p department_id = "142173000000210031"
+          p department_id = "142173000000210031" #pallabita
+          p agent_number = "+918420541541" 
             if payload['lastName'] == "Aniket Biswas"
               # p agent_number = "+916295945754"
-              p agent_number = "+918597663642"
+              # p agent_number = "+918967181069"
+              p agent_number = "+916294418010"
+            else
+              p agent_number = "+918420541541"
             end
 
         elsif agent_id == "142173000000191144"
-          p department_id = "142173000000010772"
+          p department_id = "142173000000010772" #rimi
           p agent_number = "+917044111333"
           if payload['lastName'] == "Aniket Biswas"
             # p agent_number = "+916295945754"
-            p agent_number = "+918597663642"
+            # p agent_number = "+918967181069"
+            p agent_number = "+916294418010"
+            # 919903085111
+          else
+            p agent_number = "+917044111333"
           end
         elsif agent_id == "142173000000233350" 
-          p department_id = "142173000000227047"
+          p department_id = "142173000000227047" #sarnali
           p agent_number = "+919007576657"
           if payload['lastName'] == "Aniket Biswas"
             # p agent_number = "+916295945754"
-            p agent_number = "+918597663642"
+            # p agent_number = "+918967181069"
+            p agent_number = "+916294418010"
+          else
+            p agent_number = "+919007576657"
           end
         end
         Rails.cache.write(:department_id, department_id)
@@ -278,7 +301,9 @@ class WebhooksController < ApplicationController
             }
         }.to_json)
         if contact_update_response.code == 200
+          p "======================================= contact call customer false ==================================="
           p  contact_update_response
+          p "======================================= contact call customer false ==================================="
         end
         call_response = HTTParty.post("https://kpi.knowlarity.com/Basic/v1/account/call/makecall",
           headers: {
@@ -313,16 +338,42 @@ class WebhooksController < ApplicationController
         p "Agent ID #{agent_id = Rails.cache.read(:agent_id)}"
         p "Department ID #{department_id = Rails.cache.read(:department_id)}"
         p "Call ID #{call_id = payload['id']}"
-        p "=================================== update owner and department of the call response ===================================="
+        p "contact ID #{contactId = payload['contactId']}"
+        # p "=================================== update owner and department of the call response ===================================="
+        # max_retries = 3
+        # retry_count = 0
+        # retry_delay = 1 # in seconds, adjust as needed
+        # p response = HTTParty.put("https://desk.zoho.in/api/v1/calls/#{call_id}", 
+        #       headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'},
+        #       body: {
+        #         "ownerId" => agent_id,
+        #         "departmentId" => department_id
+        #   }.to_json)
+        # p "=================================== update owner and department of the call response ===================================="
         max_retries = 3
         retry_count = 0
-        retry_delay = 1 # in seconds, adjust as needed
+        retry_delay = 5 # in seconds, adjust as needed
         begin
-          p response = HTTParty.put("https://desk.zoho.in/api/v1/calls/#{call_id}", headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'},
-                body: {
-                  "ownerId" => agent_id,
-                  "departmentId" => department_id
-            }.to_json)
+          p "======================================================================== Create call ===================================="
+          p response = HTTParty.post("https://desk.zoho.in/api/v1/calls", 
+              headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'},
+              body: {
+                "duration" => "300",
+                "reminder" => [ {
+                  "alertType" => [ "POPUP" ],
+                  "reminderType" => "ABSOLUTE",
+                  "reminderTime" => "2024-7-10T10:49:13.000Z"
+                } ],
+                "contactId" => contactId,
+                "subject" => "New Testing Call",
+                "departmentId" => department_id,
+                "ownerId" => agent_id,
+                "startTime" => "2024-7-10T10:48:13.000Z",
+                "priority" => "High",
+                "direction" => "inbound",
+                "status" => "In Progress"
+          }.to_json)
+          p "==================================================================== Create call ===================================="
         rescue HTTParty::Error => e
           if retry_count < max_retries
             retry_count += 1
