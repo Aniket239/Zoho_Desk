@@ -7,6 +7,7 @@ class TicketsController < ApplicationController
     p "refresh token: #{refresh_token}"
     token_url = "https://accounts.zoho.in/oauth/v2/token"
 
+    
     response = HTTParty.post(token_url, body: {
       refresh_token: refresh_token,
       client_id: client_id,

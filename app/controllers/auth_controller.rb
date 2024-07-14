@@ -3,6 +3,7 @@ class AuthController < ApplicationController
     client_id = '1000.AX7K22BZK6OS35PYCBPO990IEX8ZPC'
     redirect_uri = 'http://localhost:3000/auth/callback'
     # Define all the scopes based on your needs
+    
     scopes = [
         'Desk.tickets.ALL',
         'Desk.tickets.READ',

@@ -431,4 +431,37 @@ class WebhooksController < ApplicationController
       # end
       head :ok
     end
+
+    def incomming_call
+      max_retries = 3
+      retry_count = 0
+      retry_delay = 5 # in seconds, adjust as needed
+      begin
+        p "======================================================================== Create call ===================================="
+        p response = HTTParty.post("https://desk.zoho.in/api/v1/calls", 
+            headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'},
+            body: {
+              "duration" => "300",
+              "contactId" => contactId,
+              "subject" => "New Testing Call",
+              "departmentId" => department_id,
+              "ownerId" => agent_id,
+              "startTime" => "2024-7-10T10:48:13.000Z",
+              "priority" => "High",
+              "direction" => "inbound",
+              "status" => "In Progress"
+        }.to_json)
+        p "==================================================================== Create call ===================================="
+      rescue HTTParty::Error => e
+        if retry_count < max_retries
+          retry_count += 1
+          puts "Retry #{retry_count}/#{max_retries}"
+          sleep(retry_delay)
+          retry
+        else
+          puts "Max retries reached, aborting"
+          raise e
+        end
+      end
+    end
   end
