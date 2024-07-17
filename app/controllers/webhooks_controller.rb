@@ -2,7 +2,7 @@ class WebhooksController < ApplicationController
     skip_before_action :verify_authenticity_token
     require 'mail'
     require 'uri'
-
+    require 'json'
     @agent_id
     @department_id
 
@@ -11,7 +11,7 @@ class WebhooksController < ApplicationController
     
       until access_token
         response = HTTParty.post("https://accounts.zoho.in/oauth/v2/token", body: {
-          refresh_token: '1000.ef62475c1f53d03d249acbc51d446cac.8c2d55c1e215f71701e39803e5ab0d8a',
+          refresh_token: '1000.1cbae518d194d16c74dcc107bb0a3412.3bb9a0fc2e82b2e4f557327992d43da7',
           client_id: '1000.AX7K22BZK6OS35PYCBPO990IEX8ZPC',
           client_secret: '69f04bf294dee8d3a69c77367163af960c83814985',
           grant_type: 'refresh_token'
@@ -26,7 +26,7 @@ class WebhooksController < ApplicationController
           p "================================================= failed access token generated ========================================"
           p "Failed to refresh token with #{response.code}"
           p "================================================= failed access token generated ========================================"
-          sleep(5)  # wait for 5 seconds before retrying
+          sleep(30)  # wait for 5 seconds before retrying
         end
       end
     
@@ -331,61 +331,61 @@ class WebhooksController < ApplicationController
     end
 
     def ongoing_call
-      request_data = params
-      if request_data.dig('_json', 0, 'eventType') == 'Call_Add'
-        p "================================ request params data ======================================="
-        p payload = request_data.dig('_json', 0)['payload'] || {}
-        p "Agent ID #{agent_id = Rails.cache.read(:agent_id)}"
-        p "Department ID #{department_id = Rails.cache.read(:department_id)}"
-        p "Call ID #{call_id = payload['id']}"
-        p "contact ID #{contactId = payload['contactId']}"
-        # p "=================================== update owner and department of the call response ===================================="
-        # max_retries = 3
-        # retry_count = 0
-        # retry_delay = 1 # in seconds, adjust as needed
-        # p response = HTTParty.put("https://desk.zoho.in/api/v1/calls/#{call_id}", 
-        #       headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'},
-        #       body: {
-        #         "ownerId" => agent_id,
-        #         "departmentId" => department_id
-        #   }.to_json)
-        # p "=================================== update owner and department of the call response ===================================="
-        max_retries = 3
-        retry_count = 0
-        retry_delay = 5 # in seconds, adjust as needed
-        begin
-          p "======================================================================== Create call ===================================="
-          p response = HTTParty.post("https://desk.zoho.in/api/v1/calls", 
-              headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'},
-              body: {
-                "duration" => "300",
-                "reminder" => [ {
-                  "alertType" => [ "POPUP" ],
-                  "reminderType" => "ABSOLUTE",
-                  "reminderTime" => "2024-7-10T10:49:13.000Z"
-                } ],
-                "contactId" => contactId,
-                "subject" => "New Testing Call",
-                "departmentId" => department_id,
-                "ownerId" => agent_id,
-                "startTime" => "2024-7-10T10:48:13.000Z",
-                "priority" => "High",
-                "direction" => "inbound",
-                "status" => "In Progress"
-          }.to_json)
-          p "==================================================================== Create call ===================================="
-        rescue HTTParty::Error => e
-          if retry_count < max_retries
-            retry_count += 1
-            puts "Retry #{retry_count}/#{max_retries}"
-            sleep(retry_delay)
-            retry
-          else
-            puts "Max retries reached, aborting"
-            raise e
-          end
-        end
-      end     
+      # request_data = params
+      # if request_data.dig('_json', 0, 'eventType') == 'Call_Add'
+      #   p "================================ request params data ======================================="
+      #   p payload = request_data.dig('_json', 0)['payload'] || {}
+      #   p "Agent ID #{agent_id = Rails.cache.read(:agent_id)}"
+      #   p "Department ID #{department_id = Rails.cache.read(:department_id)}"
+      #   p "Call ID #{call_id = payload['id']}"
+      #   p "contact ID #{contactId = payload['contactId']}"
+      #   # p "=================================== update owner and department of the call response ===================================="
+      #   # max_retries = 3
+      #   # retry_count = 0
+      #   # retry_delay = 1 # in seconds, adjust as needed
+      #   # p response = HTTParty.put("https://desk.zoho.in/api/v1/calls/#{call_id}", 
+      #   #       headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'},
+      #   #       body: {
+      #   #         "ownerId" => agent_id,
+      #   #         "departmentId" => department_id
+      #   #   }.to_json)
+      #   # p "=================================== update owner and department of the call response ===================================="
+      #   max_retries = 3
+      #   retry_count = 0
+      #   retry_delay = 5 # in seconds, adjust as needed
+      #   begin
+      #     p "======================================================================== Create call ===================================="
+      #     p response = HTTParty.post("https://desk.zoho.in/api/v1/calls", 
+      #         headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'},
+      #         body: {
+      #           "duration" => "300",
+      #           "reminder" => [ {
+      #             "alertType" => [ "POPUP" ],
+      #             "reminderType" => "ABSOLUTE",
+      #             "reminderTime" => "2024-7-10T10:49:13.000Z"
+      #           } ],
+      #           "contactId" => contactId,
+      #           "subject" => "New Testing Call",
+      #           "departmentId" => department_id,
+      #           "ownerId" => agent_id,
+      #           "startTime" => "2024-7-10T10:48:13.000Z",
+      #           "priority" => "High",
+      #           "direction" => "inbound",
+      #           "status" => "In Progress"
+      #     }.to_json)
+      #     p "==================================================================== Create call ===================================="
+      #   rescue HTTParty::Error => e
+      #     if retry_count < max_retries
+      #       retry_count += 1
+      #       puts "Retry #{retry_count}/#{max_retries}"
+      #       sleep(retry_delay)
+      #       retry
+      #     else
+      #       puts "Max retries reached, aborting"
+      #       raise e
+      #     end
+      #   end
+      # end     
       # if request_data.dig('_json', 0, 'eventType') == 'Call_Update' && request_data.dig('_json', 0, 'payload')['status'] == "Completed"
       #   p "====================================================== call completed ==================================================="
       #   p payload = request_data.dig('_json', 0)['payload'] || {}
@@ -433,38 +433,67 @@ class WebhooksController < ApplicationController
     end
 
     def incoming_call
-      request_data = params
-      max_retries = 3
-      retry_count = 0
-      retry_delay = 5 # in seconds, adjust as needed
-      begin
-        p "======================================================================== Create call ===================================="
-        p response = HTTParty.post("https://desk.zoho.in/api/v1/calls", 
-            headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'},
-            body: {
-              "duration" => "300",
-              "contactId" => contactId,
-              "subject" => "New Testing Call",
-              "departmentId" => department_id,
-              "ownerId" => agent_id,
-              "startTime" => "2024-7-10T10:48:13.000Z",
-              "priority" => "High",
-              "direction" => "inbound",
-              "status" => "In Progress"
-        }.to_json)
-        p "==================================================================== Create call ===================================="
-      rescue HTTParty::Error => e
-        if retry_count < max_retries
-          retry_count += 1
-          puts "Retry #{retry_count}/#{max_retries}"
-          sleep(retry_delay)
-          retry
-        else
-          puts "Max retries reached, aborting"
-          raise e
+      received_data = params[:data]
+      json_data = params[:data].split("data: ")[1].strip
+      parsed_data = JSON.parse(json_data)
+      p '======================================================================================================'
+      p "event_type  #{event_type = parsed_data["event_type"]}"
+      p "agent_number  #{agent_number = parsed_data["agent_number"]}"
+      p "call_recording  #{call_recording = parsed_data["call_recording"]}"
+      p "call_recording  #{call_direction = parsed_data["call_direction"]}"
+      p "customer_number  #{customer_number = parsed_data["customer_number"]}"
+      p '========================================================================================================='
+      if  event_type == "ORIGINATE"
+        max_retries = 3
+        retry_count = 0
+        retry_delay = 5 # in seconds, adjust as needed
+        if agent_number = "+918420541541"
+          agent_id = "142173000000064001"
+          department_id = "142173000000210031" #pallabita 
+        elsif agent_number = "+917044111333"
+          agent_id = "142173000000191144"
+          department_id = "142173000000010772" #rimi
+        elsif agent_number = "+919007576657"
+          department_id = "142173000000227047" #sarnali
+          agent_id = "142173000000233350"
+        end
+        p "======================================================================== contact ===================================="
+        response = HTTParty.get("https://desk.zoho.in/api/v1/contacts?from=0,limit=100", 
+              headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'})
+        p response
+        if response.code == 200
+          p response
+        end
+        p "======================================================================== contact ===================================="
+        begin
+          p "======================================================================== Create call ===================================="
+          p response = HTTParty.post("https://desk.zoho.in/api/v1/calls", 
+              headers: { 'Authorization' => "Zoho-oauthtoken #{access_token}" ,'Content-Type' => 'application/json'},
+              body: {
+                "duration" => "300",
+                "contactId" => contactId,
+                "subject" => "Incoming call from #{customer_number}",
+                "departmentId" => department_id,
+                "ownerId" => agent_id,
+                "startTime" => "2024-7-10T10:48:13.000Z",
+                "priority" => "High",
+                "direction" => "inbound",
+                "status" => "In Progress"
+          }.to_json)
+          p "==================================================================== Create call ===================================="
+        rescue HTTParty::Error => e
+          if retry_count < max_retries
+            retry_count += 1
+            puts "Retry #{retry_count}/#{max_retries}"
+            sleep(retry_delay)
+            retry
+          else
+            puts "Max retries reached, aborting"
+            raise e
+          end
         end
       end
-    head :ok
+      head :ok
     end
   end
 
